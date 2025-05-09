@@ -1,0 +1,6 @@
+@BitBalance.API_HostAddress = http://localhost:5245
+
+GET {{BitBalance.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
