@@ -12,6 +12,7 @@ public class Asset
     public Money PurchasePrice { get; private set; }
     public DateTime PurchaseDate { get; private set; }
 
+    protected Asset() { }
     public Asset(string symbol, Money quantity, Money purchasePrice, DateTime purchaseDate)
     {
         if (string.IsNullOrWhiteSpace(symbol))

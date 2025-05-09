@@ -1,34 +1,37 @@
+using BitBalance.Application.Interfaces;
+using BitBalance.Application.Services;
+using BitBalance.Domain.Interfaces;
+using BitBalance.Infrastructure.Data;
+using BitBalance.Infrastructure.Repositories;
+using BitBalance.Infrastructure.Services;
+using BitBalance.Infrastructure.SignalR;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddDbContext<BitBalanceDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddControllers();
+builder.Services.AddSignalR();
+builder.Services.AddSwaggerGen();
+
+builder.Services.AddScoped<IAssetRepository, AssetRepository>();
+builder.Services.AddScoped<IPortfolioRepository, PortfolioRepository>();
+builder.Services.AddScoped<IPortfolioService, PortfolioService>();
+builder.Services.AddHttpClient<IPriceService, CoinGeckoPriceService>();
+builder.Services.AddScoped<IPriceService, MockPriceService>();
+
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-
-app.UseHttpsRedirection();
-
-var summaries = new[]
+app.UseSwagger(c =>
 {
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast = Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
+    c.OpenApiVersion = Microsoft.OpenApi.OpenApiSpecVersion.OpenApi2_0;
 });
+app.UseSwaggerUI();
+app.MapHub<NotificationHub>("/notificationHub");
 
 app.Run();
-
-internal record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
