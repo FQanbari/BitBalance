@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\BitBalance.Domain\BitBalance.Domain.csproj" />
+  </ItemGroup>
+
 </Project>
