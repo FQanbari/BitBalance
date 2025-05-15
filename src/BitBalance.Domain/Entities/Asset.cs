@@ -1,34 +1,44 @@
-﻿using BitBalance.Domain.Exceptions;
+﻿using BitBalance.Domain.Common;
+using BitBalance.Domain.Exceptions;
 using BitBalance.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace BitBalance.Domain.Entities;
-public class Asset
+public class Asset: BaseEntity<Guid>
 {
-    public Guid Id { get; private set; }
-    public string Symbol { get; private set; } 
+    public CoinSymbol CoinSymbol { get; private set; } 
     public Money Quantity { get; private set; }
     public Money PurchasePrice { get; private set; }
     public DateTime PurchaseDate { get; private set; }
 
     protected Asset() { }
-    public Asset(string symbol, Money quantity, Money purchasePrice, DateTime purchaseDate)
+    public Asset(CoinSymbol symbol, Money quantity, Money purchasePrice, DateTime purchaseDate)
     {
-        if (string.IsNullOrWhiteSpace(symbol))
+        if (symbol is null)
             throw new DomainException("Symbol is required.");
 
         Id = Guid.NewGuid();
-        Symbol = symbol;
+        CoinSymbol = symbol;
         Quantity = quantity ?? throw new ArgumentNullException(nameof(quantity));
         PurchasePrice = purchasePrice ?? throw new ArgumentNullException(nameof(purchasePrice)); ;
         PurchaseDate = purchaseDate;
+        CreatedAt = DateTime.UtcNow;
     }
 
     public Money TotalCost => Quantity * PurchasePrice;
     public void UpdateQuantity(Money newQuantity)
     {
         Quantity = newQuantity ?? throw new ArgumentNullException(nameof(newQuantity));
+    }
+    public Money GetCurrentValue(Money currentPrice)
+    {
+        return Quantity * currentPrice;
+    }
+
+    public Money GetProfitLoss(Money currentPrice)
+    {
+        return GetCurrentValue(currentPrice) - (Quantity * PurchasePrice);
     }
 }
 public class AssetConfiguration : IEntityTypeConfiguration<Asset>
@@ -37,7 +47,10 @@ public class AssetConfiguration : IEntityTypeConfiguration<Asset>
     {
         builder.HasKey(a => a.Id);
 
-        builder.Property(a => a.Symbol)
+        builder.Property(p => p.CoinSymbol)
+            .HasConversion(
+                cs => cs.Symbol,
+                s => CoinSymbol.From(s))
             .IsRequired()
             .HasMaxLength(10);
 
@@ -64,5 +77,6 @@ public class AssetConfiguration : IEntityTypeConfiguration<Asset>
         });
 
         builder.Property(a => a.PurchaseDate).IsRequired();
+        builder.Property(a => a.CreatedAt).IsRequired();
     }
 }
