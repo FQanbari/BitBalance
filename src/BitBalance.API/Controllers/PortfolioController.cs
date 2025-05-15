@@ -1,47 +1,55 @@
-﻿using BitBalance.Application.Interfaces;
+﻿using BitBalance.API.Filters;
 using BitBalance.Application.Portfolios.Commands;
-using BitBalance.Application.Queries;
+using BitBalance.Application.Portfolios.Queries;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BitBalance.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class PortfolioController : ControllerBase
+[ServiceFilter(typeof(RequestLoggingFilter))]
+public class PortfoliosController : ControllerBase
 {
-    private readonly IPortfolioService _portfolioService;
+    private readonly IMediator _mediator;
 
-    public PortfolioController(IPortfolioService portfolioService)
+    public PortfoliosController(IMediator mediator)
     {
-        _portfolioService = portfolioService;
+        _mediator = mediator;
     }
 
-    [HttpGet("{portfolioId}/value")]
-    public async Task<IActionResult> GetPortfolioValue(Guid portfolioId)
+    [HttpPost]
+    public async Task<IActionResult> Create([FromBody] CreatePortfolioCommand command)
     {
-        try
-        {
-            var result = await _portfolioService.GetPortfolioValueAsync(new GetPortfolioValueQuery { PortfolioId = portfolioId});
-            return Ok(result);
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(ex.Message);
-        }
+        var portfolioId = await _mediator.Send(command);
+        return CreatedAtAction(nameof(GetById), new { id = portfolioId }, null);
+    }
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetById(Guid id)
+    {
+        var portfolio = await _mediator.Send(new GetPortfolioByIdQuery(id));
+        if (portfolio == null)
+            return NotFound();
+
+        return Ok(portfolio);
     }
 
     [HttpPost("{portfolioId}/assets")]
-    public async Task<IActionResult> AddAsset(Guid portfolioId, [FromBody] CreateAssetCommand command)
+    public async Task<IActionResult> AddAsset(Guid portfolioId, [FromBody] AddAssetCommand command)
     {
-        try
-        {
-            command.PortfolioId = portfolioId;
-            await _portfolioService.AddAssetAsync(command);
-            return Ok();
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(ex.Message);
-        }
+        if (portfolioId != command.PortfolioId)
+            return BadRequest("Portfolio ID mismatch");
+
+        await _mediator.Send(command);
+        return NoContent();
+    }
+
+    [HttpDelete("{portfolioId}/assets/{assetId}")]
+    public async Task<IActionResult> RemoveAsset(Guid portfolioId, Guid assetId)
+    {
+        var command = new RemoveAssetCommand(portfolioId, assetId);
+        await _mediator.Send(command);
+        return NoContent();
     }
 }
