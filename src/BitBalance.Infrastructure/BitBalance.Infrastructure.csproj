@@ -15,4 +15,11 @@
     <ProjectReference Include="..\BitBalance.Application\BitBalance.Application.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Caching\" />
+    <Folder Include="Logging\" />
+    <Folder Include="Notifiers\" />
+    <Folder Include="Services\" />
+  </ItemGroup>
+
 </Project>

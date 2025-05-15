@@ -1,9 +1,9 @@
 ﻿using BitBalance.Domain.Entities;
 using BitBalance.Domain.Interfaces;
-using BitBalance.Infrastructure.Data;
+using BitBalance.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
-namespace BitBalance.Infrastructure.Repositories;
+namespace BitBalance.Infrastructure.Persistence.Repositories;
 
 public class PortfolioRepository : IPortfolioRepository
 {
@@ -18,13 +18,13 @@ public class PortfolioRepository : IPortfolioRepository
     {
         return await _context.Portfolios
             .Include(p => p.Assets)
+            .Include(p => EF.Property<IEnumerable<Alert>>(p, "_alerts")) // Owned collection
             .FirstOrDefaultAsync(p => p.Id == id);
     }
 
     public async Task AddAsync(Portfolio portfolio)
     {
         _context.Portfolios.Add(portfolio);
-        await _context.SaveChangesAsync();
     }
 
     public async Task SaveChangesAsync()
@@ -35,7 +35,6 @@ public class PortfolioRepository : IPortfolioRepository
     public async Task UpdateAsync(Portfolio portfolio)
     {
         _context.Portfolios.Update(portfolio);
-        await _context.SaveChangesAsync();
     }
 
     public async Task<List<Portfolio>> GetAllWithAlertsAsync()
