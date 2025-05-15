@@ -6,6 +6,7 @@ using BitBalance.Infrastructure.Repositories;
 using BitBalance.Infrastructure.Services;
 using BitBalance.Infrastructure.SignalR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,23 +16,35 @@ builder.Services.AddDbContext<BitBalanceDbContext>(options =>
 
 builder.Services.AddControllers();
 builder.Services.AddSignalR();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "BitBalance API", Version = "v1" });
+});
 
+// Repository and Services
 builder.Services.AddScoped<IAssetRepository, AssetRepository>();
 builder.Services.AddScoped<IPortfolioRepository, PortfolioRepository>();
 builder.Services.AddScoped<IPortfolioService, PortfolioService>();
+
+// Choose one of the price services:
 builder.Services.AddHttpClient<IPriceService, CoinGeckoPriceService>();
-builder.Services.AddScoped<IPriceService, MockPriceService>();
+// OR
+// builder.Services.AddScoped<IPriceService, MockPriceService>();
 
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-app.UseSwagger(c =>
+if (app.Environment.IsDevelopment())
 {
-    c.OpenApiVersion = Microsoft.OpenApi.OpenApiSpecVersion.OpenApi2_0;
-});
-app.UseSwaggerUI();
+    app.UseSwagger();
+    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "BitBalance API v1"));
+}
+
+app.UseRouting();
+app.UseAuthorization(); // If you use authentication
+
+app.MapControllers();
 app.MapHub<NotificationHub>("/notificationHub");
 
 app.Run();
