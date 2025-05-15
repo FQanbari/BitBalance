@@ -13,6 +13,8 @@ public class Portfolio : BaseEntity<Guid>, IAggregateRoot
     public string Name { get; private set; }
     private readonly List<Asset> _assets = new();
     public IReadOnlyCollection<Asset> Assets => _assets.AsReadOnly();
+    private readonly List<Alert> _alerts = new();
+    public IReadOnlyCollection<Alert> Alerts => _alerts.AsReadOnly();
 
     public Portfolio(string name)
     {
@@ -35,6 +37,13 @@ public class Portfolio : BaseEntity<Guid>, IAggregateRoot
         var asset = _assets.FirstOrDefault(a => a.Id == assetId);
         if (asset != null)
             _assets.Remove(asset);
+    }
+
+    public void AddAlert(Alert alert)
+    {
+        if (alert == null)
+            throw new DomainException("Alert cannot be null.");
+        _alerts.Add(alert);
     }
 
     public Money TotalInvestmentValue()
@@ -73,5 +82,40 @@ public class PortfolioConfiguration : IEntityTypeConfiguration<Portfolio>
 
         builder.Property(p => p.CreatedAt)
            .IsRequired();
+
+        builder.OwnsMany(p => p.Alerts, a =>
+        {
+            a.WithOwner().HasForeignKey("PortfolioId");
+
+            a.HasKey(p => p.Id);
+
+            a.Property(p => p.Type)
+                .HasConversion<int>()
+                .IsRequired();
+
+            a.Property(p => p.IsTriggered).IsRequired();
+            a.Property(p => p.CreatedAt).IsRequired();
+
+            a.OwnsOne(p => p.CoinSymbol, cs =>
+            {
+                cs.Property(c => c.Symbol)
+                  .HasColumnName("CoinSymbol")
+                  .HasMaxLength(10)
+                  .IsRequired();
+            });
+
+            a.OwnsOne(p => p.TargetPrice, tp =>
+            {
+                tp.Property(p => p.Amount)
+                  .HasColumnName("TargetAmount")
+                  .HasPrecision(18, 2);
+
+                tp.Property(p => p.Currency)
+                  .HasColumnName("TargetCurrency")
+                  .HasMaxLength(5);
+            });
+
+            a.ToTable("PortfolioAlerts"); // جدا کردن جدول
+        });
     }
 }

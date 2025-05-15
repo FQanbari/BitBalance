@@ -1,5 +1,5 @@
-﻿using BitBalance.Application.Commands;
-using BitBalance.Application.Interfaces;
+﻿using BitBalance.Application.Interfaces;
+using BitBalance.Application.Portfolios.Commands;
 using BitBalance.Application.Queries;
 using Microsoft.AspNetCore.Mvc;
 

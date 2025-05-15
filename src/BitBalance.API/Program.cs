@@ -24,12 +24,17 @@ builder.Services.AddSwaggerGen(c =>
 // Repository and Services
 builder.Services.AddScoped<IAssetRepository, AssetRepository>();
 builder.Services.AddScoped<IPortfolioRepository, PortfolioRepository>();
-builder.Services.AddScoped<IPortfolioService, PortfolioService>();
+
+builder.Services.Configure<CoinGeckoOptions>(
+    builder.Configuration.GetSection("CryptoProviders:CoinGecko"));
+
+builder.Services.AddHttpClient<ICryptoPriceProvider, CoinGeckoPriceProvider>();
+
 
 // Choose one of the price services:
-builder.Services.AddHttpClient<IPriceService, CoinGeckoPriceService>();
+builder.Services.AddHttpClient<ICryptoPriceProvider, CoinGeckoPriceService>();
 // OR
-// builder.Services.AddScoped<IPriceService, MockPriceService>();
+// builder.Services.AddScoped<ICryptoPriceProvider, MockPriceService>();
 
 
 var app = builder.Build();

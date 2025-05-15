@@ -37,4 +37,15 @@ public class PortfolioRepository : IPortfolioRepository
         _context.Portfolios.Update(portfolio);
         await _context.SaveChangesAsync();
     }
+
+    public async Task<List<Portfolio>> GetAllWithAlertsAsync()
+    {
+        //return await _context.Portfolios
+        //.Include(p => p.Alerts)
+        //.ToListAsync();
+        return await _context.Portfolios
+            .Include(p => EF.Property<IEnumerable<Alert>>(p, "_alerts"))
+            .ToListAsync();
+
+    }
 }

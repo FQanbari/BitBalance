@@ -3,7 +3,7 @@ using System.Text.Json.Nodes;
 
 namespace BitBalance.Infrastructure.Services;
 
-public class CoinGeckoPriceService : IPriceService
+public class CoinGeckoPriceService : ICryptoPriceProvider
 {
     private readonly HttpClient _httpClient;
 
@@ -12,7 +12,7 @@ public class CoinGeckoPriceService : IPriceService
         _httpClient = httpClient;
     }
 
-    public async Task<decimal> GetCurrentPriceAsync(string symbol)
+    public async Task<decimal> GetPriceAsync(string symbol)
     {
         symbol = symbol.ToLower(); // BTC → btc
         var url = $"https://api.coingecko.com/api/v3/simple/price?ids={symbol}&vs_currencies=usd";
