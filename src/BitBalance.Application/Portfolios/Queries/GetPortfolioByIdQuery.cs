@@ -34,3 +34,14 @@ public class GetPortfolioByIdQueryHandler : IRequestHandler<GetPortfolioByIdQuer
         };
     }
 }
+//export interface Portfolio
+//{
+//    id: string;
+//  name: string;
+//  totalValue: number;
+//  totalProfit: number;
+//  profitPercentage: number;
+//  assets: Asset[];
+//  createdAt: string;
+//  updatedAt: string;
+//}
