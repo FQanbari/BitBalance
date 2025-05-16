@@ -17,9 +17,9 @@ public class PortfolioRepository : IPortfolioRepository
     public async Task<Portfolio?> GetByIdAsync(Guid id)
     {
         return await _context.Portfolios
-            .Include(p => p.Assets)
-            .Include(p => EF.Property<IEnumerable<Alert>>(p, "_alerts")) // Owned collection
-            .FirstOrDefaultAsync(p => p.Id == id);
+               .Include(p => p.Assets)
+               .Include(p => p.Alerts)
+               .FirstOrDefaultAsync(p => p.Id == id);
     }
 
     public async Task AddAsync(Portfolio portfolio)
@@ -43,7 +43,7 @@ public class PortfolioRepository : IPortfolioRepository
         //.Include(p => p.Alerts)
         //.ToListAsync();
         return await _context.Portfolios
-            .Include(p => EF.Property<IEnumerable<Alert>>(p, "_alerts"))
+            .Include(p => p.Alerts)
             .ToListAsync();
 
     }

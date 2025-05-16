@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using BitBalance.Infrastructure.Notifiers;
+using Microsoft.AspNetCore.Builder;
 
 namespace BitBalance.Infrastructure.Extensions;
 
@@ -26,5 +27,15 @@ public static class ServiceCollectionExtensions
         // services.AddScoped<IAlertNotifier, TelegramNotifier>();
 
         return services;
+    }
+    public async static Task<IApplicationBuilder> UseInfrastructure(this IApplicationBuilder app)
+    {
+        using (var scope = app.ApplicationServices.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<BitBalanceDbContext>();
+            await DbInitializer.SeedAsync(db);
+        }
+
+        return app;
     }
 }
