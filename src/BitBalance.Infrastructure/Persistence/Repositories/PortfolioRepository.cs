@@ -14,6 +14,13 @@ public class PortfolioRepository : IPortfolioRepository
         _context = context;
     }
 
+    public async Task<IEnumerable<Portfolio>> GetAllByUserAsync(Guid userId)
+    {
+        return await _context.Portfolios
+               .Include(p => p.Assets)
+               .Include(p => p.Alerts)
+               .Where(p => p.UserId == userId).ToListAsync();
+    }
     public async Task<Portfolio?> GetByIdAsync(Guid id)
     {
         return await _context.Portfolios

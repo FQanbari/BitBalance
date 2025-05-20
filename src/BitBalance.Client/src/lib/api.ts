@@ -1,7 +1,8 @@
 
 import axios from 'axios';
+import { Alert, Asset, Portfolio } from '../types';
 
-const API_URL = 'http://localhost:55007/api';
+const API_URL = 'https://localhost:55008/api';
 
 export const apiClient = axios.create({
   baseURL: API_URL,
@@ -44,7 +45,7 @@ export const portfolioApi = {
   get: (id: string) => apiClient.get(`/portfolios/${id}`),
   create: (data: { name: string }) => apiClient.post('/portfolios', data),
   delete: (id: string) => apiClient.delete(`/portfolios/${id}`),
-  addAsset: (portfolioId: string, asset: any) => 
+  addAsset: (portfolioId: string, asset: Asset) => 
     apiClient.post(`/portfolios/${portfolioId}/assets`, asset),
   removeAsset: (portfolioId: string, assetId: string) => 
     apiClient.delete(`/portfolios/${portfolioId}/assets/${assetId}`),
@@ -53,7 +54,7 @@ export const portfolioApi = {
 // Alert endpoints
 export const alertApi = {
   getActive: (portfolioId: string) => apiClient.get(`/alerts/${portfolioId}/active`),
-  create: (alert: any) => apiClient.post('/alerts', alert),
+  create: (alert: Alert) => apiClient.post('/alerts', alert),
   delete: (id: string) => apiClient.delete(`/alerts/${id}`),
   evaluate: () => apiClient.post('/alerts/evaluate'),
 };
@@ -75,5 +76,5 @@ export const authApi = {
 
 // Settings endpoints
 export const settingsApi = {
-  updatePreferences: (preferences: any) => apiClient.post('/settings/preferences', preferences),
+    updatePreferences: (preferences: string) => apiClient.post('/settings/preferences', preferences),
 };

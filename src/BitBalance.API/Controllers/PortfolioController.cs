@@ -1,8 +1,10 @@
-﻿using BitBalance.API.Filters;
+﻿using BitBalance.API.Extensions;
+using BitBalance.API.Filters;
 using BitBalance.Application.Portfolios.Commands;
 using BitBalance.Application.Portfolios.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace BitBalance.API.Controllers;
 
@@ -18,10 +20,22 @@ public class PortfoliosController : ControllerBase
         _mediator = mediator;
     }
 
+    [HttpGet]
+    public async Task<IActionResult> GetAll()
+    {
+        var userId = User.GetUserIdAsGuid();
+        var portfolio = await _mediator.Send(new GetAllPortfoliosQuery(userId));
+        if (portfolio == null)
+            return NotFound();
+
+        return Ok(portfolio);
+    }
+
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreatePortfolioCommand command)
     {
-        var portfolioId = await _mediator.Send(command);
+        var modifiedCommand = command with { UserId = User.GetUserIdAsGuid() };
+        var portfolioId = await _mediator.Send(modifiedCommand);
         return CreatedAtAction(nameof(GetById), new { id = portfolioId }, null);
     }
 

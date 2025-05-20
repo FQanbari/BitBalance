@@ -11,14 +11,16 @@ namespace BitBalance.Domain.Entities;
 public class Portfolio : BaseEntity<Guid>, IAggregateRoot
 {
     public string Name { get; private set; }
+    public Guid UserId { get; private set; }
     private readonly List<Asset> _assets = new();
     public IReadOnlyCollection<Asset> Assets => _assets.AsReadOnly();
     private readonly List<Alert> _alerts = new();
     public IReadOnlyCollection<Alert> Alerts => _alerts.AsReadOnly();
 
-    public Portfolio(string name)
+    public Portfolio(Guid userId, string name)
     {
         Id = Guid.NewGuid();
+        UserId = userId;
         Name = name;
         CreatedAt = DateTime.UtcNow;
     }

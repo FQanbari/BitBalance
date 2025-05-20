@@ -7,7 +7,7 @@ using MediatR;
 
 namespace BitBalance.Application.Portfolios.Commands;
 
-public record CreatePortfolioCommand(string Name) : IRequest<Guid>;
+public record CreatePortfolioCommand(Guid UserId,string Name) : IRequest<Guid>;
 public class CreatePortfolioCommandValidator : AbstractValidator<CreatePortfolioCommand>
 {
     public CreatePortfolioCommandValidator()
@@ -29,7 +29,7 @@ public class CreatePortfolioCommandHandler : IRequestHandler<CreatePortfolioComm
 
     public async Task<Guid> Handle(CreatePortfolioCommand request, CancellationToken cancellationToken)
     {
-        var portfolio = new Portfolio(request.Name);
+        var portfolio = new Portfolio(request.UserId ,request.Name);
         await _repo.AddAsync(portfolio);
         await _uow.SaveChangesAsync();
 

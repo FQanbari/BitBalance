@@ -12,7 +12,7 @@ public static class DbInitializer
             var btc = CoinSymbol.BTC;
             var usd = "USD";
 
-            var p1 = new Portfolio("Demo Portfolio");
+            var p1 = new Portfolio(new Guid("b4c5701b-ba0d-4619-9e8f-2e48292733b3"), "Demo Portfolio");
             var asset = new Asset(
                 btc,
                 new Money(0.5m, usd),
