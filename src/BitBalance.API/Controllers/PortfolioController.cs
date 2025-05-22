@@ -58,7 +58,13 @@ public class PortfoliosController : ControllerBase
         await _mediator.Send(command);
         return NoContent();
     }
-
+    [HttpDelete("{portfolioId}")]
+    public async Task<IActionResult> RemovePortfolio(Guid portfolioId)
+    {
+        var command = new RemovePortfolioCommand(portfolioId);
+        await _mediator.Send(command);
+        return NoContent();
+    }
     [HttpDelete("{portfolioId}/assets/{assetId}")]
     public async Task<IActionResult> RemoveAsset(Guid portfolioId, Guid assetId)
     {

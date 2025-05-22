@@ -50,8 +50,10 @@ public class AddAssetCommandHandler : IRequestHandler<AddAssetCommand, Unit>
             new Money(request.PurchasePrice, request.Currency),
             request.PurchaseDate
         );
+     
 
         portfolio.AddAsset(asset);
+
         await _uow.SaveChangesAsync();
 
         return Unit.Value;

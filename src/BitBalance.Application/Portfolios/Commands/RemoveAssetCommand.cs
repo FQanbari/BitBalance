@@ -26,3 +26,28 @@ public class RemoveAssetCommandHandler : IRequestHandler<RemoveAssetCommand, Uni
         return Unit.Value;
     }
 }
+public record RemovePortfolioCommand(Guid PortfolioId) : IRequest<Unit>;
+
+public class RemovePortfolioCommandHandler : IRequestHandler<RemovePortfolioCommand, Unit>
+{
+    private readonly IPortfolioRepository _repo;
+    private readonly IUnitOfWork _uow;
+
+    public RemovePortfolioCommandHandler(IPortfolioRepository repo, IUnitOfWork uow)
+    {
+        _repo = repo;
+        _uow = uow;
+    }
+
+    public async Task<Unit> Handle(RemovePortfolioCommand request, CancellationToken cancellationToken)
+    {
+        var portfolio = await _repo.GetByIdAsync(request.PortfolioId);
+        if (portfolio.Assets.Count > 0)
+            throw new ApplicationException("You are not allow to remove portfolio!!");
+
+        _repo.RemoveAsync(portfolio);
+        await _uow.SaveChangesAsync();
+
+        return Unit.Value;
+    }
+}

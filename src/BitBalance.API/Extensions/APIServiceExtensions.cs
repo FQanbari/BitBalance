@@ -12,6 +12,16 @@ public static class APIServiceExtensions
     {
         services.AddSwaggerDocumentation();
         services.AddScoped<RequestLoggingFilter>();
+        services.AddCors(options =>
+        {
+            options.AddPolicy("AllowSpecificOrigin", policy =>
+            {
+                policy.WithOrigins("http://localhost:55007") 
+                      .AllowAnyMethod()
+                      .AllowAnyHeader()
+                      .AllowCredentials(); 
+            });
+        });
 
         return services;
     }
@@ -19,6 +29,7 @@ public static class APIServiceExtensions
     public static IApplicationBuilder UseAPIService(this IApplicationBuilder app)
     {
         app.UseSwaggerDocumentation();
+        app.UseCors("AllowSpecificOrigin");
 
         return app;
     }

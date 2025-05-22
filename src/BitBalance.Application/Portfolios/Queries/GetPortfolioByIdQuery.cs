@@ -22,6 +22,7 @@ public class GetPortfolioByIdQueryHandler : IRequestHandler<GetPortfolioByIdQuer
         {
             Id = portfolio.Id,
             Name = portfolio.Name,
+            CreatedAt = portfolio.CreatedAt,
             Assets = portfolio.Assets.Select(a => new AssetDto
             {
                 Id = a.Id,

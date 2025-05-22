@@ -7,21 +7,22 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 namespace BitBalance.Domain.Entities;
 public class Asset: BaseEntity<Guid>
 {
+    //public Guid PortfolioId { get; private set; }
     public CoinSymbol CoinSymbol { get; private set; } 
     public Money Quantity { get; private set; }
     public Money PurchasePrice { get; private set; }
     public DateTime PurchaseDate { get; private set; }
-
+    //public Portfolio Portfolio { get; private set; }
     protected Asset() { }
     public Asset(CoinSymbol symbol, Money quantity, Money purchasePrice, DateTime purchaseDate)
     {
         if (symbol is null)
             throw new DomainException("Symbol is required.");
 
-        Id = Guid.NewGuid();
+        //Id = Guid.NewGuid();
         CoinSymbol = symbol;
         Quantity = quantity ?? throw new ArgumentNullException(nameof(quantity));
-        PurchasePrice = purchasePrice ?? throw new ArgumentNullException(nameof(purchasePrice)); ;
+        PurchasePrice = purchasePrice ?? throw new ArgumentNullException(nameof(purchasePrice)); 
         PurchaseDate = purchaseDate;
         CreatedAt = DateTime.UtcNow;
     }
@@ -40,12 +41,24 @@ public class Asset: BaseEntity<Guid>
     {
         return GetCurrentValue(currentPrice) - (Quantity * PurchasePrice);
     }
+
+    //public void SetPortfolioId(Guid portfolioId)
+    //{
+    //    PortfolioId = portfolioId;
+    //}
 }
 public class AssetConfiguration : IEntityTypeConfiguration<Asset>
 {
     public void Configure(EntityTypeBuilder<Asset> builder)
     {
         builder.HasKey(a => a.Id);
+
+        builder.Property(a => a.Id)
+            .ValueGeneratedOnAdd();
+
+
+        builder.Property<Guid>("PortfolioId")
+        .IsRequired();
 
         builder.Property(p => p.CoinSymbol)
             .HasConversion(
@@ -58,22 +71,26 @@ public class AssetConfiguration : IEntityTypeConfiguration<Asset>
         {
             q.Property(p => p.Amount)
              .HasColumnName("QuantityAmount")
-             .HasPrecision(18, 2);
+             .HasPrecision(18, 2)
+             .IsRequired();
 
             q.Property(p => p.Currency)
              .HasColumnName("QuantityCurrency")
-             .HasMaxLength(5);
+             .HasMaxLength(5)
+             .IsRequired();
         });
 
         builder.OwnsOne(a => a.PurchasePrice, pp =>
         {
             pp.Property(p => p.Amount)
               .HasColumnName("PriceAmount")
-              .HasPrecision(18, 2);
+              .HasPrecision(18, 2)
+              .IsRequired();
 
             pp.Property(p => p.Currency)
               .HasColumnName("PriceCurrency")
-              .HasMaxLength(5);
+              .HasMaxLength(5)
+              .IsRequired();
         });
 
         builder.Property(a => a.PurchaseDate).IsRequired();

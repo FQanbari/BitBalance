@@ -26,7 +26,7 @@ public class PortfolioRepository : IPortfolioRepository
         return await _context.Portfolios
                .Include(p => p.Assets)
                .Include(p => p.Alerts)
-               .FirstOrDefaultAsync(p => p.Id == id);
+               .Where(p => p.Id == id).FirstOrDefaultAsync();
     }
 
     public async Task AddAsync(Portfolio portfolio)
@@ -43,7 +43,10 @@ public class PortfolioRepository : IPortfolioRepository
     {
         _context.Portfolios.Update(portfolio);
     }
-
+    public async Task RemoveAsync(Portfolio portfolio)
+    {
+        _context.Portfolios.Remove(portfolio);
+    }
     public async Task<List<Portfolio>> GetAllWithAlertsAsync()
     {
         //return await _context.Portfolios

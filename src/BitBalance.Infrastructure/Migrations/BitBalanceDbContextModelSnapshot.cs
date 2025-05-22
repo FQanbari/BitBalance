@@ -36,10 +36,7 @@ namespace BitBalance.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid?>("PortfolioId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("PortfolioId1")
+                    b.Property<Guid>("PortfolioId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("PurchaseDate")
@@ -48,8 +45,6 @@ namespace BitBalance.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("PortfolioId");
-
-                    b.HasIndex("PortfolioId1");
 
                     b.ToTable("Assets");
                 });
@@ -98,12 +93,9 @@ namespace BitBalance.Infrastructure.Migrations
                 {
                     b.HasOne("BitBalance.Domain.Entities.Portfolio", null)
                         .WithMany("Assets")
-                        .HasForeignKey("PortfolioId");
-
-                    b.HasOne("BitBalance.Domain.Entities.Portfolio", null)
-                        .WithMany()
-                        .HasForeignKey("PortfolioId1")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("PortfolioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.OwnsOne("BitBalance.Domain.ValueObjects.Money", "PurchasePrice", b1 =>
                         {

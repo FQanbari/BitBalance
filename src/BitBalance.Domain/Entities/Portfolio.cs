@@ -13,7 +13,7 @@ public class Portfolio : BaseEntity<Guid>, IAggregateRoot
     public string Name { get; private set; }
     public Guid UserId { get; private set; }
     private readonly List<Asset> _assets = new();
-    public IReadOnlyCollection<Asset> Assets => _assets.AsReadOnly();
+    public IList<Asset> Assets => _assets.AsReadOnly();
     private readonly List<Alert> _alerts = new();
     public IReadOnlyCollection<Alert> Alerts => _alerts.AsReadOnly();
 
@@ -30,6 +30,7 @@ public class Portfolio : BaseEntity<Guid>, IAggregateRoot
         if (asset == null)
             throw new DomainException("Asset cannot be null.");
 
+        //asset.SetPortfolioId(this.Id);
         _assets.Add(asset);
         AddDomainEvent(new AssetAddedEvent(this.Id, asset));
     }
@@ -78,9 +79,17 @@ public class PortfolioConfiguration : IEntityTypeConfiguration<Portfolio>
         builder.HasKey(p => p.Id);
 
         builder
-            .HasMany<Asset>()
-            .WithOne() 
-            .OnDelete(DeleteBehavior.Cascade);
+             .HasMany(p => p.Assets)
+             .WithOne()
+             //.WithOne(a => a.Portfolio)
+             .HasForeignKey("PortfolioId") // Shadow property
+             .OnDelete(DeleteBehavior.Cascade);
+
+        builder
+            .Metadata
+            .FindNavigation(nameof(Portfolio.Assets))!
+            .SetPropertyAccessMode(PropertyAccessMode.Field);
+
 
         builder.Property(p => p.CreatedAt)
            .IsRequired();
@@ -117,7 +126,7 @@ public class PortfolioConfiguration : IEntityTypeConfiguration<Portfolio>
                   .HasMaxLength(5);
             });
 
-            a.ToTable("PortfolioAlerts"); // جدا کردن جدول
+            a.ToTable("PortfolioAlerts"); 
         });
     }
 }

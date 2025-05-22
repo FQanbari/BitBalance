@@ -7,6 +7,7 @@ public class Money : ValueObject
     public decimal Amount { get; private set; }
     public string Currency { get; private set; }
 
+    protected Money() { }
     public Money(decimal amount, string currency)
     {
         if (amount < 0)

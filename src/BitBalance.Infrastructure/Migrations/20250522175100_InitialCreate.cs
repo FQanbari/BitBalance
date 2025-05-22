@@ -51,8 +51,7 @@ namespace BitBalance.Infrastructure.Migrations
                     PriceAmount = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
                     PriceCurrency = table.Column<string>(type: "nvarchar(5)", maxLength: 5, nullable: false),
                     PurchaseDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    PortfolioId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    PortfolioId1 = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    PortfolioId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
@@ -61,11 +60,6 @@ namespace BitBalance.Infrastructure.Migrations
                     table.ForeignKey(
                         name: "FK_Assets_Portfolios_PortfolioId",
                         column: x => x.PortfolioId,
-                        principalTable: "Portfolios",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_Assets_Portfolios_PortfolioId1",
-                        column: x => x.PortfolioId1,
                         principalTable: "Portfolios",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -99,11 +93,6 @@ namespace BitBalance.Infrastructure.Migrations
                 name: "IX_Assets_PortfolioId",
                 table: "Assets",
                 column: "PortfolioId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Assets_PortfolioId1",
-                table: "Assets",
-                column: "PortfolioId1");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PortfolioAlerts_PortfolioId",

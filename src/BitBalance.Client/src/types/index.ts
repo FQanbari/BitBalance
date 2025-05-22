@@ -15,6 +15,7 @@ export interface Asset {
   portfolioId: string;
   coinSymbol: string;
   coinName: string;
+  currency: string;
   quantity: number;
   purchasePrice: number;
   currentPrice: number;

@@ -22,6 +22,7 @@ public class GetAllPortfoliosQueryHandler : IRequestHandler<GetAllPortfoliosQuer
         {
             Id = a.Id,
             Name = a.Name,
+            CreatedAt = a.CreatedAt,
             Assets = a.Assets.Select(a => new AssetDto
             {
                 Id = a.Id,

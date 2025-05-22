@@ -15,8 +15,8 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddDbContext<BitBalanceDbContext>(options =>
-            options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+       
+
         services.Configure<CoinGeckoOptions>(configuration.GetSection("CryptoProviders:CoinGecko"));
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
