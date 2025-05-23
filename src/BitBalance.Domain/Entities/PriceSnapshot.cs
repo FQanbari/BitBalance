@@ -22,6 +22,11 @@ public class PriceSnapshot: BaseEntity<Guid>
         Price = price;
         CreatedAt = timestamp;
     }
+    public void UpdatePrice(Money newPrice)
+    {
+        if (newPrice == null) throw new ArgumentNullException(nameof(newPrice));
+        Price = newPrice;
+    }
 }
 public class PriceSnapshotConfiguration : IEntityTypeConfiguration<PriceSnapshot>
 {

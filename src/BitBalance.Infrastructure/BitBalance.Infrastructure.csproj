@@ -18,7 +18,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Caching\" />
     <Folder Include="Logging\" />
   </ItemGroup>
 
