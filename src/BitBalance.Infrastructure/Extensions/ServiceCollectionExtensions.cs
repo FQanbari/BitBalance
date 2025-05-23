@@ -26,6 +26,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IPortfolioRepository, PortfolioRepository>();
         services.AddScoped<IPriceSnapshotRepository, PriceSnapshotRepository>();
+        services.AddScoped<IUserSettingsRepository, UserSettingsRepository>();
         //services.AddHttpClient<ICryptoPriceProvider, CoinGeckoPriceProvider>();
 
         services.AddScoped<IAlertNotifier, EmailNotifier>();

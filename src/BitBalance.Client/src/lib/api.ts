@@ -76,5 +76,6 @@ export const authApi = {
 
 // Settings endpoints
 export const settingsApi = {
+    getPreferences: (preferences: string) => apiClient.get(`/settings`),
     updatePreferences: (preferences: string) => apiClient.post('/settings/preferences', preferences),
 };
