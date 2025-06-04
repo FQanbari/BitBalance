@@ -3,6 +3,7 @@ using BitBalance.Domain.Interfaces;
 using FluentValidation;
 using MediatR;
 using BitBalance.Domain.Entities;
+using System.Text.RegularExpressions;
 
 namespace BitBalance.Application.UserSettings.Command;
 
@@ -34,6 +35,14 @@ public class UpdateUserSettingsCommandValidator : AbstractValidator<UpdateUserSe
 
         RuleFor(x => x.Language)
             .Length(2, 5).WithMessage("Language code must be 2-5 characters.");
+
+        RuleFor(x => x.NotificationEmail)
+            .Must(x => string.IsNullOrWhiteSpace(x) || !Regex.IsMatch(x, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
+            .WithMessage("Email cannot be empty.");
+
+        RuleFor(x => x.TelegramHandle)
+            .Must(x => string.IsNullOrWhiteSpace(x) || x.StartsWith("@"))
+            .WithMessage("Invalid telegram handle");
     }
 }
 

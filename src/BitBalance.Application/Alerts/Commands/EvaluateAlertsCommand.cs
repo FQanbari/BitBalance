@@ -5,7 +5,7 @@ using MediatR;
 
 namespace BitBalance.Application.Alerts.Commands;
 
-public record EvaluateAlertsCommand : IRequest<Unit>;
+public record EvaluateAlertsCommand(Guid UserId) : IRequest<Unit>;
 public class EvaluateAlertsCommandHandler : IRequestHandler<EvaluateAlertsCommand, Unit>
 {
     private readonly IPortfolioRepository _portfolioRepository;
@@ -30,7 +30,7 @@ public class EvaluateAlertsCommandHandler : IRequestHandler<EvaluateAlertsComman
 
     public async Task<Unit> Handle(EvaluateAlertsCommand request, CancellationToken cancellationToken)
     {
-        var portfolios = await _portfolioRepository.GetAllWithAlertsAsync();
+        var portfolios = await _portfolioRepository.GetAllWithAlertsAsync(request.UserId);
 
         foreach (var portfolio in portfolios)
         {

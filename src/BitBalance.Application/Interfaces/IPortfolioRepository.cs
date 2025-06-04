@@ -9,5 +9,5 @@ public interface IPortfolioRepository
     Task AddAsync(Portfolio portfolio);
     Task UpdateAsync(Portfolio portfolio);
     Task RemoveAsync(Portfolio portfolio);
-    Task<List<Portfolio>> GetAllWithAlertsAsync();
+    Task<List<Portfolio>> GetAllWithAlertsAsync(Guid userId);
 }

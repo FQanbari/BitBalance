@@ -54,8 +54,9 @@ export const portfolioApi = {
 // Alert endpoints
 export const alertApi = {
   getActive: (portfolioId: string) => apiClient.get(`/alerts/${portfolioId}/active`),
+  getAllActive: () => apiClient.get(`/alerts/active`),
   create: (alert: Alert) => apiClient.post('/alerts', alert),
-  delete: (id: string) => apiClient.delete(`/alerts/${id}`),
+  delete: (portfolioId: string, id: string) => apiClient.delete(`/alerts/${portfolioId}/${id}`),
   evaluate: () => apiClient.post('/alerts/evaluate'),
 };
 

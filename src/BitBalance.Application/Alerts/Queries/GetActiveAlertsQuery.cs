@@ -6,7 +6,7 @@ using MediatR;
 
 namespace BitBalance.Application.Alerts.Queries;
 
-public record GetActiveAlertsQuery(Guid PortfolioId) : IRequest<List<AlertDto>>;
+public record GetActiveAlertsQuery(Guid UserId) : IRequest<List<AlertDto>>;
 public class CreateAlertCommandValidator : AbstractValidator<CreateAlertCommand>
 {
     public CreateAlertCommandValidator()
@@ -30,18 +30,22 @@ public class GetActiveAlertsQueryHandler : IRequestHandler<GetActiveAlertsQuery,
 
     public async Task<List<AlertDto>> Handle(GetActiveAlertsQuery request, CancellationToken cancellationToken)
     {
-        var portfolio = await _portfolioRepo.GetByIdAsync(request.PortfolioId);
+        var portfolios = await _portfolioRepo.GetAllWithAlertsAsync(request.UserId);
 
-        return portfolio.Alerts
-            .Where(a => !a.IsTriggered)
-            .Select(a => new AlertDto
-            {
-                Id = a.Id,
-                CoinSymbol = a.CoinSymbol.Symbol,
-                TargetPrice = a.TargetPrice.Amount,
-                Currency = a.TargetPrice.Currency,
-                Type = a.Type.ToString(),
-                CreatedAt = a.CreatedAt
-            }).ToList();
+        return portfolios
+            .SelectMany(p => p.Alerts
+                .Where(alert => !alert.IsTriggered)
+                .Select(alert => new AlertDto
+                {
+                    PortfolioName = p.Name,
+                    Id = alert.Id,
+                    CoinSymbol = alert.CoinSymbol.Symbol,
+                    TargetPrice = alert.TargetPrice.Amount,
+                    Currency = alert.TargetPrice.Currency,
+                    Type = alert.Type.ToString(),
+                    CreatedAt = alert.CreatedAt
+                }))
+            .ToList();
     }
+
 }

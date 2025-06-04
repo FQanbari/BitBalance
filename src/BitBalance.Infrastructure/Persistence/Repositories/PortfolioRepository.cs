@@ -47,13 +47,14 @@ public class PortfolioRepository : IPortfolioRepository
     {
         _context.Portfolios.Remove(portfolio);
     }
-    public async Task<List<Portfolio>> GetAllWithAlertsAsync()
+    public async Task<List<Portfolio>> GetAllWithAlertsAsync(Guid userId)
     {
         //return await _context.Portfolios
         //.Include(p => p.Alerts)
         //.ToListAsync();
         return await _context.Portfolios
             .Include(p => p.Alerts)
+            .Where(p => p.UserId == userId)
             .ToListAsync();
 
     }

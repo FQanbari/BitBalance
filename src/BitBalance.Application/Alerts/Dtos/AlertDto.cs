@@ -8,4 +8,5 @@ public class AlertDto
     public decimal TargetPrice { get; set; }
     public string Type { get; set; }
     public DateTime CreatedAt { get; set; }
+    public string PortfolioName { get; internal set; }
 }

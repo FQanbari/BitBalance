@@ -20,8 +20,8 @@ public class AlertEvaluator
 
         return alert.Type switch
         {
-            AlertType.PriceAbove => currentPrice.Amount > alert.TargetPrice.Amount,
-            AlertType.PriceBelow => currentPrice.Amount < alert.TargetPrice.Amount,
+            AlertType.Above => currentPrice.Amount > alert.TargetPrice.Amount,
+            AlertType.Below => currentPrice.Amount < alert.TargetPrice.Amount,
             _ => throw new NotSupportedException($"AlertType '{alert.Type}' not supported.")
         };
     }

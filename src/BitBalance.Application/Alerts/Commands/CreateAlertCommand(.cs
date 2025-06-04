@@ -9,6 +9,7 @@ namespace BitBalance.Application.Alerts.Commands;
 
 public record CreateAlertCommand(
     Guid PortfolioId,
+    Guid UserId,
     string CoinSymbol,
     string Currency,
     decimal TargetPrice,
@@ -28,6 +29,9 @@ public class CreateAlertCommandHandler : IRequestHandler<CreateAlertCommand, Gui
     public async Task<Guid> Handle(CreateAlertCommand request, CancellationToken cancellationToken)
     {
         var portfolio = await _portfolioRepo.GetByIdAsync(request.PortfolioId);
+
+        if (portfolio.UserId != request.UserId)
+            throw new ApplicationException("This portfolio not belong to this user!!");
 
         var alert = new Alert(
             CoinSymbol.From(request.CoinSymbol),

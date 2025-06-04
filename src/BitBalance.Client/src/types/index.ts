@@ -29,10 +29,12 @@ export interface Asset {
 export interface Alert {
   id: string;
   portfolioId: string;
+  portfolioName?: string;
   coinSymbol: string;
   coinName: string;
   targetPrice: number;
   currentPrice: number;
+  currency: string;
   type: "Above" | "Below";
   triggered: boolean;
   createdAt: string;

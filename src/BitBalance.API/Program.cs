@@ -5,6 +5,8 @@ using BitBalance.Infrastructure.Extensions;
 using BitBalance.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<BitBalanceDbContext>(options =>
@@ -17,12 +19,15 @@ Log.Logger = new LoggerConfiguration()
 builder.Host.UseSerilog((context, configuration) =>
     configuration.ReadFrom.Configuration(context.Configuration));
 
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase, allowIntegerValues: false));
+    });
+
 builder.Services.AddAPIService();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration); 
-
-builder.Services.AddControllers();
-
 
 var app = builder.Build();
 

@@ -48,7 +48,12 @@ public class Portfolio : BaseEntity<Guid>, IAggregateRoot
             throw new DomainException("Alert cannot be null.");
         _alerts.Add(alert);
     }
-
+    public void RemoveAlert(Guid alertId)
+    {
+        var alert = _alerts.FirstOrDefault(a => a.Id == alertId);
+        if (alert != null)
+            _alerts.Remove(alert);
+    }
     public Money TotalInvestmentValue()
     {
         return _assets.Select(a => a.TotalCost).Aggregate(Money.Zero(), (acc, val) => acc + val);

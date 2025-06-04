@@ -1,5 +1,7 @@
-﻿using BitBalance.Application.Alerts.Commands;
+﻿using BitBalance.API.Extensions;
+using BitBalance.Application.Alerts.Commands;
 using BitBalance.Application.Alerts.Queries;
+using BitBalance.Application.Portfolios.Commands;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,7 +21,8 @@ public class AlertsController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateAlertCommand command)
     {
-        var alertId = await _mediator.Send(command);
+        var modifiedCommand = command with { UserId = User.GetUserIdAsGuid() };
+        var alertId = await _mediator.Send(modifiedCommand);
         return CreatedAtAction(nameof(GetActiveAlerts), new { portfolioId = command.PortfolioId }, alertId);
     }
 
@@ -29,11 +32,24 @@ public class AlertsController : ControllerBase
         var alerts = await _mediator.Send(new GetActiveAlertsQuery(portfolioId));
         return Ok(alerts);
     }
+    [HttpGet("active")]
+    public async Task<IActionResult> GetAllActiveAlerts(Guid portfolioId)
+    {
+        var alerts = await _mediator.Send(new GetActiveAlertsQuery(User.GetUserIdAsGuid()));
+        return Ok(alerts);
+    }
 
     [HttpPost("evaluate")]
     public async Task<IActionResult> EvaluateAlerts()
     {
-        await _mediator.Send(new EvaluateAlertsCommand());
+        await _mediator.Send(new EvaluateAlertsCommand(User.GetUserIdAsGuid()));
+        return NoContent();
+    }
+    [HttpDelete("{portfolioId}/{assetId}")]
+    public async Task<IActionResult> RemoveAlert(Guid portfolioId, Guid assetId)
+    {
+        var command = new RemoveAlertCommand(portfolioId, assetId);
+        await _mediator.Send(command);
         return NoContent();
     }
 }

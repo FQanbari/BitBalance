@@ -2,6 +2,5 @@
 
 public enum AlertType
 {
-    PriceAbove,
-    PriceBelow
+    Above,Below
 }
