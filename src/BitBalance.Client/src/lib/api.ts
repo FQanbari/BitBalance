@@ -1,6 +1,6 @@
 
 import axios from 'axios';
-import { Alert, Asset, Portfolio } from '../types';
+import { Alert, Asset, Portfolio, UserSettings } from '../types';
 
 const API_URL = 'https://localhost:55008/api';
 
@@ -76,6 +76,6 @@ export const authApi = {
 
 // Settings endpoints
 export const settingsApi = {
-    getPreferences: (preferences: string) => apiClient.get(`/settings`),
-    updatePreferences: (preferences: string) => apiClient.post('/settings/preferences', preferences),
+    getPreferences: () => apiClient.get(`/UserSettings`),
+    updatePreferences: (preferences: UserSettings) => apiClient.put('/UserSettings/preferences', preferences),
 };

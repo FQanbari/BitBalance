@@ -19,14 +19,22 @@ public class GetUserSettingsQueryHandler : IRequestHandler<GetUserSettingsQuery,
         var settings = await _repo.GetByUserIdAsync(request.UserId);
 
         if (settings == null)
-            throw new ApplicationException("UserSettings not found.");
+            return new UserSettingsDto
+            {
+                DefaultCurrency = "USD",
+                NotificationMethod = "None",
+                Theme = "system",
+                Language = "en",
+            };
 
         return new UserSettingsDto
         {
             DefaultCurrency = settings.DefaultCurrency,
             NotificationMethod = settings.NotificationMethod,
             Theme = settings.Theme,
-            Language = settings.Language
+            Language = settings.Language,
+            NotificationEmail = settings.NotificationEmail,
+            TelegramHandle = settings.TelegramHandle
         };
     }
 }

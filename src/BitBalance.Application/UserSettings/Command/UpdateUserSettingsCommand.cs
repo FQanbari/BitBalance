@@ -7,11 +7,13 @@ using BitBalance.Domain.Entities;
 namespace BitBalance.Application.UserSettings.Command;
 
 public record UpdateUserSettingsCommand(
-    Guid UserId, 
-    string DefaultCurrency = "USD", 
-    string NotificationMethod = "email", 
-    string Theme = "light", 
-    string Language = "en") : IRequest<Unit>;
+    Guid UserId,
+    string DefaultCurrency = "USD",
+    string NotificationMethod = "email",
+    string Theme = "light",
+    string Language = "en",
+    string? NotificationEmail = null, 
+    string? TelegramHandle = null) : IRequest<Unit>;
 public class UpdateUserSettingsCommandValidator : AbstractValidator<UpdateUserSettingsCommand>
 {
     public UpdateUserSettingsCommandValidator()
@@ -57,7 +59,9 @@ public class UpdateUserSettingsCommandHandler : IRequestHandler<UpdateUserSettin
                 request.DefaultCurrency,
                 request.NotificationMethod,
                 request.Theme,
-                request.Language
+                request.Language,
+                request.NotificationEmail,
+                request.TelegramHandle
             );
             await _repo.AddAsync(settings);
         }
@@ -67,7 +71,9 @@ public class UpdateUserSettingsCommandHandler : IRequestHandler<UpdateUserSettin
                 request.DefaultCurrency,
                 request.NotificationMethod,
                 request.Theme,
-                request.Language
+                request.Language,
+                request.NotificationEmail,
+                request.TelegramHandle
             );
         }
 

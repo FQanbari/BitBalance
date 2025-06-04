@@ -60,3 +60,11 @@ export interface User {
     };
   };
 }
+export interface UserSettings {
+    defaultCurrency: string;
+    notificationMethod: 'Email' | 'Telegram' | 'None'; 
+    theme: 'light' | 'dark' | 'system';
+    language: string;
+    notificationEmail?:string;
+    telegramHandle?:string;
+}

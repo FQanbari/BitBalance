@@ -11,25 +11,33 @@ public class UserSettings : BaseEntity<Guid>
     public string NotificationMethod { get; private set; }
     public string Theme { get; private set; }
     public string Language { get; private set; }
+    public string? NotificationEmail { get; private set; }
+    public string? TelegramHandle { get; private set; }
+
 
     protected UserSettings() { }
 
-    public UserSettings(Guid userId, string defaultCurrency = "USD", string notificationMethod = "email", string theme = "light", string language = "en")
+    public UserSettings(Guid userId, string defaultCurrency = "USD", string notificationMethod = "email", string theme = "light", string language = "en", string? email = null, string? telegram = null)
     {
         UserId = userId;
         DefaultCurrency = defaultCurrency;
         NotificationMethod = notificationMethod;
         Theme = theme;
         Language = language;
+        NotificationEmail = email;
+        TelegramHandle = telegram;
     }
 
-    public void Update(string currency, string notification, string theme, string language)
+    public void Update(string currency, string notification, string theme, string language, string? email = null, string? telegram = null)
     {
         DefaultCurrency = currency;
         NotificationMethod = notification;
         Theme = theme;
         Language = language;
+        NotificationEmail = email;
+        TelegramHandle = telegram;
     }
+
 }
 public class UserSettingsConfiguration : IEntityTypeConfiguration<UserSettings>
 {
@@ -41,5 +49,8 @@ public class UserSettingsConfiguration : IEntityTypeConfiguration<UserSettings>
         builder.Property(s => s.Theme).HasMaxLength(10);
         builder.Property(s => s.Language).HasMaxLength(5);
         builder.HasIndex(s => s.UserId).IsUnique();
+        builder.Property(s => s.NotificationEmail).HasMaxLength(100);
+        builder.Property(s => s.TelegramHandle).HasMaxLength(50);
+
     }
 }

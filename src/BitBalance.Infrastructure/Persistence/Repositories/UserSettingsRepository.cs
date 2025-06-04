@@ -1,5 +1,6 @@
 ﻿using BitBalance.Domain.Entities;
 using BitBalance.Domain.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace BitBalance.Infrastructure.Persistence.Repositories;
 
