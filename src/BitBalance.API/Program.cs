@@ -4,11 +4,19 @@ using BitBalance.Application.Extensions;
 using BitBalance.Infrastructure.Extensions;
 using BitBalance.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<BitBalanceDbContext>(options =>
            options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .CreateLogger();
+
+builder.Host.UseSerilog((context, configuration) =>
+    configuration.ReadFrom.Configuration(context.Configuration));
+
 builder.Services.AddAPIService();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration); 
@@ -17,6 +25,8 @@ builder.Services.AddControllers();
 
 
 var app = builder.Build();
+
+app.UseSerilogRequestLogging();
 
 app.UseMiddleware<ErrorHandlingMiddleware>();
 
