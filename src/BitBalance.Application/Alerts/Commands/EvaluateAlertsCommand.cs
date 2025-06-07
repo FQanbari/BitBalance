@@ -36,7 +36,7 @@ public class EvaluateAlertsCommandHandler : IRequestHandler<EvaluateAlertsComman
         {
             foreach (var alert in portfolio.Alerts.Where(a => !a.IsTriggered))
             {
-                var currentPrice = await _priceProvider.GetPriceAsync(alert.CoinSymbol);
+                var currentPrice = await _priceProvider.TryGetPriceAsync(alert.CoinSymbol);
 
                 if (_evaluator.ShouldTrigger(alert, currentPrice))
                 {

@@ -1,21 +1,22 @@
 ﻿using BitBalance.Application.Interfaces;
 using BitBalance.Domain.ValueObjects;
+using BitBalance.Infrastructure.Fallback;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
 namespace BitBalance.Infrastructure.External.CoinGecko;
 
-public class CoinCapPriceProvider : ICryptoPriceProvider
+public class CoinCapPriceProvider : BaseCryptoProvider
 {
     private readonly HttpClient _httpClient;
     private readonly string _baseUrl = "https://api.coincap.io/v2";
 
-    public CoinCapPriceProvider(HttpClient httpClient,
-        IOptions<ProviderOptions> options)
+    public CoinCapPriceProvider(HttpClient client, PriceRequestNotifier notifier, IOptions<ProviderOptions> options) : base(notifier)
     {
-            _httpClient = httpClient;
-            _baseUrl = options.Value.BaseUrl ?? throw new ArgumentNullException(nameof(options));
+        _httpClient = client;
+        _baseUrl = options.Value.BaseUrl ?? throw new ArgumentNullException(nameof(options));
     }
+
 
     public async Task<Money> GetPriceAsync(CoinSymbol symbol)
     {
@@ -35,6 +36,15 @@ public class CoinCapPriceProvider : ICryptoPriceProvider
             throw new ApplicationException("Invalid price format.");
 
         return new Money(priceUsd, "USD");
+    }
+
+    protected override async Task<Money?> GetPriceInternalAsync(CoinSymbol symbol)
+    {
+        try
+        {
+            return await GetPriceAsync(symbol);
+        }
+        catch { return null; }
     }
 
     private string MapSymbolToCoinId(string symbol) =>

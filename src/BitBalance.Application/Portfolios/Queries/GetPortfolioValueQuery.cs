@@ -21,7 +21,7 @@ public class GetPortfolioValueQueryHandler : IRequestHandler<GetPortfolioValueQu
         var portfolio = await _repo.GetByIdAsync(request.PortfolioId);
         return portfolio.GetTotalValue(symbol =>
         {
-            var price = _priceProvider.GetPriceAsync(symbol).Result;
+            var price = _priceProvider.TryGetPriceAsync(symbol).Result;
             return price;
         }).Amount;
     }

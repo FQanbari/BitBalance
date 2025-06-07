@@ -1,42 +1,44 @@
 ﻿using BitBalance.Application.Interfaces;
 using BitBalance.Domain.ValueObjects;
+using BitBalance.Infrastructure.Fallback;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 
 namespace BitBalance.Infrastructure.External.CoinGecko;
 
-public class CoinGeckoPriceProvider : ICryptoPriceProvider
+public class CoinGeckoPriceProvider : BaseCryptoProvider
 {
     private readonly HttpClient _httpClient;
     private readonly string _baseUrl;
-
-    public CoinGeckoPriceProvider(
-        HttpClient httpClient,
-        IOptions<ProviderOptions> options)
+    public CoinGeckoPriceProvider(HttpClient client, PriceRequestNotifier notifier, IOptions<ProviderOptions> options) : base(notifier)
     {
-        _httpClient = httpClient;
+        _httpClient = client;
         _baseUrl = options.Value.BaseUrl ?? throw new ArgumentNullException(nameof(options));
     }
 
-    public async Task<Money> GetPriceAsync(CoinSymbol symbol)
+    protected override async Task<Money?> GetPriceInternalAsync(CoinSymbol symbol)
     {
-        var coinId = MapSymbolToCoinId(symbol.Symbol);
-        var url = $"{_baseUrl}/simple/price?ids={coinId}&vs_currencies=usd";
-        var url1 = $"{_baseUrl}/coins/{coinId}/market_chart?vs_currency=usd&days=200&interval=daily";
+        try
+        {
+            var coinId = MapSymbolToCoinId(symbol.Symbol);
+            var url = $"{_baseUrl}/simple/price?ids={coinId}&vs_currencies=usd";
+            var url1 = $"{_baseUrl}/coins/{coinId}/market_chart?vs_currency=usd&days=200&interval=daily";
 
-        var response = await _httpClient.GetAsync(url);
-        response.EnsureSuccessStatusCode();
+            var response = await _httpClient.GetAsync(url);
+            response.EnsureSuccessStatusCode();
 
-        var json = await response.Content.ReadAsStringAsync();
-        var result = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, decimal>>>(json);
+            var json = await response.Content.ReadAsStringAsync();
+            var result = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, decimal>>>(json);
 
-        if (result == null || !result.TryGetValue(coinId, out var priceDict))
-            throw new ApplicationException($"Price for {symbol.Symbol} not found.");
+            if (result == null || !result.TryGetValue(coinId, out var priceDict))
+                throw new ApplicationException($"Price for {symbol.Symbol} not found.");
 
-        return new Money(priceDict["usd"], "USD");
+            return new Money(priceDict["usd"], "USD");
+        }
+        catch { return null; }
     }
-
     private string MapSymbolToCoinId(string symbol) =>
         symbol.ToUpper() switch
         {
@@ -47,4 +49,3 @@ public class CoinGeckoPriceProvider : ICryptoPriceProvider
             _ => throw new NotSupportedException($"Symbol {symbol} not supported.")
         };
 }
-

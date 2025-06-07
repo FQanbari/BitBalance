@@ -1,19 +1,19 @@
 ﻿using BitBalance.Application.Interfaces;
 using BitBalance.Domain.ValueObjects;
+using BitBalance.Infrastructure.Fallback;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
 namespace BitBalance.Infrastructure.External.CoinGecko;
 
-public class BinancePriceProvider : ICryptoPriceProvider
+public class BinancePriceProvider : BaseCryptoProvider
 {
     private readonly HttpClient _httpClient;
     private readonly string _baseUrl = "https://api.binance.com/api/v3";
 
-    public BinancePriceProvider(HttpClient httpClient,
-        IOptions<ProviderOptions> options)
+    public BinancePriceProvider(HttpClient client, PriceRequestNotifier notifier, IOptions<ProviderOptions> options) : base(notifier)
     {
-        _httpClient = httpClient;
+        _httpClient = client;
         _baseUrl = options.Value.BaseUrl ?? throw new ArgumentNullException(nameof(options));
     }
 
@@ -32,6 +32,15 @@ public class BinancePriceProvider : ICryptoPriceProvider
             throw new ApplicationException("Invalid price format.");
 
         return new Money(price, "USD");
+    }
+
+    protected override async Task<Money?> GetPriceInternalAsync(CoinSymbol symbol)
+    {
+        try
+        {
+            return await GetPriceAsync(symbol);
+        }
+        catch { return null; }
     }
 
     private string MapSymbolToBinanceSymbol(string symbol) =>

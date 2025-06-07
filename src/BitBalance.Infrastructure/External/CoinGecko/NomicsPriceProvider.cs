@@ -1,21 +1,22 @@
 ﻿using BitBalance.Application.Interfaces;
 using BitBalance.Domain.ValueObjects;
+using BitBalance.Infrastructure.Fallback;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
 namespace BitBalance.Infrastructure.External.CoinGecko;
-public class NomicsPriceProvider : ICryptoPriceProvider
+public class NomicsPriceProvider : BaseCryptoProvider
 {
     private readonly HttpClient _httpClient;
     private readonly string _apiKey;
     private readonly string _baseUrl = "https://api.nomics.com/v1";
 
-    public NomicsPriceProvider(HttpClient httpClient,
-        IOptions<ProviderOptions> options)
+    public NomicsPriceProvider(HttpClient client, PriceRequestNotifier notifier, IOptions<ProviderOptions> options) : base(notifier)
     {
-        _httpClient = httpClient;
+        _httpClient = client;
         _baseUrl = options.Value.BaseUrl ?? throw new ArgumentNullException(nameof(options));
     }
+
 
     public async Task<Money> GetPriceAsync(CoinSymbol symbol)
     {
@@ -34,6 +35,15 @@ public class NomicsPriceProvider : ICryptoPriceProvider
             throw new ApplicationException("Invalid price format.");
 
         return new Money(price, "USD");
+    }
+
+    protected override async Task<Money?> GetPriceInternalAsync(CoinSymbol symbol)
+    {
+        try
+        {
+            return await GetPriceAsync(symbol);
+        }
+        catch { return null; }
     }
 
     private class NomicsTicker

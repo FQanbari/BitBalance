@@ -28,7 +28,7 @@ public class GetPortfolioAllocationQueryHandler : IRequestHandler<GetPortfolioAl
 
         return await _calculationService.CalculateAllocationAsync(portfolio, symbol =>
         {
-            var price = _priceProvider.GetPriceAsync(symbol).Result; 
+            var price = _priceProvider.TryGetPriceAsync(symbol).Result; 
             return price;
         });
     }

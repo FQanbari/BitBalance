@@ -3,6 +3,7 @@ using BitBalance.API.Middlewares;
 using BitBalance.Application.Extensions;
 using BitBalance.Infrastructure.Extensions;
 using BitBalance.Infrastructure.Persistence;
+using BitBalance.Infrastructure.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using System.Text.Json;
@@ -44,5 +45,7 @@ app.UseAuthentication();
 //app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHub<PriceHub>("/priceHub");
 
 app.Run();

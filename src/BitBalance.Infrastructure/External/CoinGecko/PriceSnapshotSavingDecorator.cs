@@ -2,6 +2,7 @@
 using BitBalance.Domain.Entities;
 using BitBalance.Domain.Interfaces;
 using BitBalance.Domain.ValueObjects;
+using System.Reflection;
 
 namespace BitBalance.Infrastructure.External.CoinGecko;
 
@@ -25,7 +26,7 @@ public class PriceSnapshotSavingDecorator : ICryptoPriceProvider
     {
         if (symbol == null) throw new ArgumentNullException(nameof(symbol));
 
-        var price = await _innerProvider.GetPriceAsync(symbol);
+        var price = await _innerProvider.TryGetPriceAsync(symbol);
 
         var snapshot = new PriceSnapshot(symbol, price, DateTime.UtcNow);
 
@@ -35,4 +36,24 @@ public class PriceSnapshotSavingDecorator : ICryptoPriceProvider
 
         return price;
     }
+
+    public ICryptoPriceProvider? SetNext(ICryptoPriceProvider next)
+    {
+        return _innerProvider.SetNext(next);
+    }
+
+    public async Task<Money?> TryGetPriceAsync(CoinSymbol symbol)
+    {
+        var price = await _innerProvider.TryGetPriceAsync(symbol);
+
+        if (price != null)
+        {
+            var snapshot = new PriceSnapshot(symbol, price, DateTime.UtcNow);
+            await _priceSnapshotRepository.AddAsync(snapshot);
+            // await _unitOfWork.SaveChangesAsync();
+        }
+
+        return price;
+    }
 }
+
