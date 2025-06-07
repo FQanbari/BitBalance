@@ -27,6 +27,7 @@ public abstract class BaseCryptoProvider : ICryptoPriceProvider
         if (result != null)
         {
             await _notifier.NotifyProviderUsed(GetType().Name);
+            await _notifier.NotifyPrice(symbol.Symbol, result.Amount);
             return result;
         }
         else if (_next != null)

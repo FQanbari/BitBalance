@@ -15,4 +15,8 @@ public class PriceRequestNotifier
     {
         await _hub.Clients.All.SendAsync("ProviderUsed", providerName);
     }
+    public async Task NotifyPrice(string symbol, decimal price)
+    {
+        await _hub.Clients.All.SendAsync("ReceivePriceAlert", symbol, price);
+    }
 }

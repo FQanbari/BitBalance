@@ -8,28 +8,16 @@ import { portfolioApi } from '@/lib/api';
 import { formatCurrency, formatDate, formatPercentage } from '@/lib/utils';
 import { useToast } from "@/hooks/use-toast";
 import { cn } from '@/lib/utils';
-import { connectToPriceHub, disconnectFromPriceHub } from '../lib/signalr/priceHub';
+import { usePrices } from '../hooks/use-prices';
 
 const Portfolios = () => {
     const [portfolios, setPortfolios] = useState<Portfolio[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [error, setError] = useState<string | null>(null);
     const { toast } = useToast();
-    const [currentPrices, setCurrentPrices] = useState<Record<string, number>>();
-
-    useEffect(() => {
-        connectToPriceHub((prices) => {
-            setCurrentPrices(prices);
-        });
-
-        return () => {
-            disconnectFromPriceHub();
-        };
-    }, []);
+    const [currentPrices, setCurrentPrices] = useState<Record<string, number>>(usePrices());
 
     const enrichPortfolios = async (rawPortfolios: Portfolio[]) => {
-        if (!currentPrices) return rawPortfolios;
-
         const enriched: Portfolio[] = [];
 
         for (const portfolio of rawPortfolios) {
@@ -38,7 +26,7 @@ const Portfolios = () => {
             const assets: Asset[] = [];
 
             for (const asset of portfolio.assets) {
-                const currentPrice = currentPrices[asset.coinSymbol] ?? 0;
+                const currentPrice = currentPrices[asset.coinSymbol]; //await getPrice(asset.coinSymbol); // یا از currentPrices[asset.coinSymbol]
                 const value = asset.quantity * currentPrice;
                 const cost = asset.quantity * asset.purchasePrice;
                 const profit = value - cost;
@@ -78,14 +66,15 @@ const Portfolios = () => {
     };
 
     useEffect(() => {
-        const enrichAndUpdate = async () => {
-            if (!currentPrices || portfolios.length === 0) return;
-            const enriched = await enrichPortfolios(portfolios);
-            setPortfolios(enriched);
+        const loadPortfolios = async () => {
+            const response = await portfolioApi.getAll();
+            const loadedPortfolios = response.data;
+            const portfoliosWithCalculatedData = await enrichPortfolios(loadedPortfolios);
+            setPortfolios(portfoliosWithCalculatedData);
         };
 
-        enrichAndUpdate();
-    }, [currentPrices]);
+        loadPortfolios();
+    }, []);
 
     const filteredPortfolios = portfolios.filter(portfolio =>
         portfolio.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -113,6 +102,7 @@ const Portfolios = () => {
             }
         }
     };
+
 
     return (
         <div>

@@ -70,3 +70,4 @@ export interface UserSettings {
     notificationEmail?:string;
     telegramHandle?:string;
 }
+export const prices: Record<string, number> = {};

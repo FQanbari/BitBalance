@@ -6,15 +6,11 @@ import { mockAlerts, mockPortfolios } from '@/lib/mock-data';
 import { Alert } from '@/types';
 import { formatCurrency } from '@/lib/utils';
 import { alertApi } from '../lib/api';
+import { usePrices } from '../hooks/use-prices';
 
-const currentPrices = {
-    BTC: 60000,
-    ETH: 3000,
-    ADA: 0.45,
-    // ...
-};
 const Alerts = () => {
-  const [alerts, setAlerts] = useState<Alert[]>([]);
+    const [alerts, setAlerts] = useState<Alert[]>([]);
+    const [currentPrices, setCurrentPrices] = useState<Record<string, number>>(usePrices());
 
     useEffect(() => {
         const fetchData = async () => {
