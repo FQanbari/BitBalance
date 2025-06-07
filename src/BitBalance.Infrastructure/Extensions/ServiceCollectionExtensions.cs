@@ -9,10 +9,10 @@ using Microsoft.EntityFrameworkCore;
 using BitBalance.Infrastructure.Notifiers;
 using Microsoft.AspNetCore.Builder;
 using BitBalance.Infrastructure.Caching;
-using BitBalance.Infrastructure.Fallback;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using BitBalance.Infrastructure.SignalR;
+using BitBalance.Infrastructure.External;
 
 namespace BitBalance.Infrastructure.Extensions;
 

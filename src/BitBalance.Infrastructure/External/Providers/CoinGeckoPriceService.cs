@@ -1,10 +1,7 @@
-﻿using BitBalance.Application.Interfaces;
-using BitBalance.Domain.ValueObjects;
-using BitBalance.Infrastructure.Fallback;
+﻿using BitBalance.Domain.ValueObjects;
+using BitBalance.Infrastructure.SignalR;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-using System.Text.Json;
-using System.Text.Json.Nodes;
 
 namespace BitBalance.Infrastructure.External.CoinGecko;
 

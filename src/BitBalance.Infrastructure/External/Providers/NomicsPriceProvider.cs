@@ -1,6 +1,5 @@
-﻿using BitBalance.Application.Interfaces;
-using BitBalance.Domain.ValueObjects;
-using BitBalance.Infrastructure.Fallback;
+﻿using BitBalance.Domain.ValueObjects;
+using BitBalance.Infrastructure.SignalR;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 

@@ -4,7 +4,7 @@ using BitBalance.Domain.Interfaces;
 using BitBalance.Domain.ValueObjects;
 using System.Reflection;
 
-namespace BitBalance.Infrastructure.External.CoinGecko;
+namespace BitBalance.Infrastructure.External;
 
 public class PriceSnapshotSavingDecorator : ICryptoPriceProvider
 {

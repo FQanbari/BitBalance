@@ -1,10 +1,10 @@
-﻿using BitBalance.Application.Interfaces;
-using BitBalance.Domain.ValueObjects;
-using BitBalance.Infrastructure.Fallback;
+﻿using BitBalance.Domain.ValueObjects;
+using BitBalance.Infrastructure.External.CoinGecko;
+using BitBalance.Infrastructure.SignalR;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
-namespace BitBalance.Infrastructure.External.CoinGecko;
+namespace BitBalance.Infrastructure.External;
 public class CryptoComparePriceProvider : BaseCryptoProvider
 {
     private readonly HttpClient _httpClient;
