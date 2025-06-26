@@ -1,4 +1,6 @@
 ﻿import { HubConnectionBuilder, HubConnection, LogLevel } from "@microsoft/signalr";
+import { store } from "../store";
+import { setPrice } from "../priceSlice";
 
 
 type PriceUpdateCallback = (prices: Record<string, number>) => void;
@@ -51,6 +53,7 @@ class PriceStore {
         this.connection.on("ReceivePriceAlert", (symbol: string, price: number) => {
             this.prices[symbol] = price;
             this.notify();
+            store.dispatch(setPrice({ symbol, price }));
         });
 
         this.connection.start()

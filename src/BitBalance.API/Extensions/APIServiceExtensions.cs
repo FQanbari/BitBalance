@@ -3,6 +3,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Security.Claims;
+using BitBalance.API.Services;
 
 namespace BitBalance.API.Extensions;
 
@@ -12,16 +13,8 @@ public static class APIServiceExtensions
     {
         services.AddSwaggerDocumentation();
         services.AddScoped<RequestLoggingFilter>();
-        services.AddCors(options =>
-        {
-            options.AddPolicy("AllowSpecificOrigin", policy =>
-            {
-                policy.WithOrigins("http://localhost:55007") 
-                      .AllowAnyMethod()
-                      .AllowAnyHeader()
-                      .AllowCredentials(); 
-            });
-        });
+     
+        services.AddHostedService<PriceUpdaterService>();
 
         return services;
     }

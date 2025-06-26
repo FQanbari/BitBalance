@@ -1,5 +1,6 @@
 ﻿using BitBalance.API.Extensions;
 using BitBalance.API.Middlewares;
+using BitBalance.API.Services;
 using BitBalance.Application.Extensions;
 using BitBalance.Infrastructure.Extensions;
 using BitBalance.Infrastructure.Persistence;
@@ -19,7 +20,16 @@ Log.Logger = new LoggerConfiguration()
 
 builder.Host.UseSerilog((context, configuration) =>
     configuration.ReadFrom.Configuration(context.Configuration));
-
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowSpecificOrigin", policy =>
+    {
+        policy.WithOrigins("http://localhost:55007", "http://localhost:42732")
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .AllowCredentials();
+    });
+});
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
@@ -28,7 +38,7 @@ builder.Services.AddControllers()
 
 builder.Services.AddAPIService();
 builder.Services.AddApplication();
-builder.Services.AddInfrastructure(builder.Configuration); 
+builder.Services.AddInfrastructure(builder.Configuration);
 
 var app = builder.Build();
 
@@ -42,7 +52,7 @@ app.UseAPIService();
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
-//app.UseAuthorization();
+app.UseAuthorization();
 
 app.MapControllers();
 

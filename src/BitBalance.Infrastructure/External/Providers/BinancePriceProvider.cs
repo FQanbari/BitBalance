@@ -10,7 +10,7 @@ public class BinancePriceProvider : BaseCryptoProvider
     private readonly HttpClient _httpClient;
     private readonly string _baseUrl = "https://api.binance.com/api/v3";
 
-    public BinancePriceProvider(HttpClient client, PriceRequestNotifier notifier, IOptions<ProviderOptions> options) : base(notifier)
+    public BinancePriceProvider(HttpClient client, PriceBroadcaster notifier, IOptions<ProviderOptions> options) : base(notifier)
     {
         _httpClient = client;
         _baseUrl = options.Value.BaseUrl ?? throw new ArgumentNullException(nameof(options));

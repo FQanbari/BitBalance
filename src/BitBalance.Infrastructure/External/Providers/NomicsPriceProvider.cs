@@ -10,7 +10,7 @@ public class NomicsPriceProvider : BaseCryptoProvider
     private readonly string _apiKey;
     private readonly string _baseUrl = "https://api.nomics.com/v1";
 
-    public NomicsPriceProvider(HttpClient client, PriceRequestNotifier notifier, IOptions<ProviderOptions> options) : base(notifier)
+    public NomicsPriceProvider(HttpClient client, PriceBroadcaster notifier, IOptions<ProviderOptions> options) : base(notifier)
     {
         _httpClient = client;
         _baseUrl = options.Value.BaseUrl ?? throw new ArgumentNullException(nameof(options));

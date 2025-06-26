@@ -12,3 +12,8 @@ public class ProviderOptions
 {
     public string BaseUrl { get; set; }
 }
+public class PriceUpdaterOptions
+{
+    public int UpdateIntervalSeconds { get; set; } = 10;
+    public int MaxSymbolsToUpdatePerCycle { get; set; } = 20;
+}

@@ -10,16 +10,20 @@ public class PriceSnapshotSavingDecorator : ICryptoPriceProvider
 {
     private readonly ICryptoPriceProvider _innerProvider;
     private readonly IPriceSnapshotRepository _priceSnapshotRepository;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IUnitOfWork _unitOfWork; 
+    private readonly ITrackedSymbolService _trackedSymbolService;
+
 
     public PriceSnapshotSavingDecorator(
         ICryptoPriceProvider innerProvider,
         IPriceSnapshotRepository priceSnapshotRepository,
-        IUnitOfWork unitOfWork)
+        IUnitOfWork unitOfWork,
+        ITrackedSymbolService trackedSymbolService)
     {
-        _innerProvider = innerProvider ?? throw new ArgumentNullException(nameof(innerProvider));
-        _priceSnapshotRepository = priceSnapshotRepository ?? throw new ArgumentNullException(nameof(priceSnapshotRepository));
-        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+        _innerProvider = innerProvider;
+        _priceSnapshotRepository = priceSnapshotRepository;
+        _unitOfWork = unitOfWork;
+        _trackedSymbolService = trackedSymbolService;
     }
 
     public async Task<Money> GetPriceAsync(CoinSymbol symbol)
@@ -51,9 +55,9 @@ public class PriceSnapshotSavingDecorator : ICryptoPriceProvider
             var snapshot = new PriceSnapshot(symbol, price, DateTime.UtcNow);
             await _priceSnapshotRepository.AddAsync(snapshot);
             // await _unitOfWork.SaveChangesAsync();
+            _trackedSymbolService.Track(symbol);
         }
 
         return price;
     }
 }
-

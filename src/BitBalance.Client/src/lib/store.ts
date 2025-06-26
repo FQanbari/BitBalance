@@ -2,7 +2,8 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import { User } from '@/types';
-
+import { configureStore } from "@reduxjs/toolkit";
+import priceReducer from "./priceSlice";
 interface AuthState {
   token: string | null;
   user: User | null;
@@ -50,3 +51,13 @@ export const useSettingsStore = create<SettingsState>()(
     )
   )
 );
+
+
+export const store = configureStore({
+    reducer: {
+        prices: priceReducer,
+    },
+});
+
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;

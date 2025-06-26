@@ -8,9 +8,9 @@ namespace BitBalance.Infrastructure.External;
 public abstract class BaseCryptoProvider : ICryptoPriceProvider
 {
     private ICryptoPriceProvider? _next;
-    protected readonly PriceRequestNotifier _notifier;
+    protected readonly PriceBroadcaster _notifier;
 
-    protected BaseCryptoProvider(PriceRequestNotifier notifier)
+    protected BaseCryptoProvider(PriceBroadcaster notifier)
     {
         _notifier = notifier;
     }
@@ -26,8 +26,8 @@ public abstract class BaseCryptoProvider : ICryptoPriceProvider
         var result = await GetPriceInternalAsync(symbol);
         if (result != null)
         {
-            await _notifier.NotifyProviderUsed(GetType().Name);
-            await _notifier.NotifyPrice(symbol.Symbol, result.Amount);
+            await _notifier.BroadcastProviderUsed(GetType().Name);
+            await _notifier.BroadcastPriceAsync(symbol.Symbol, result.Amount);
             return result;
         }
         else if (_next != null)
