@@ -18,8 +18,18 @@ Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
     .CreateLogger();
 
-builder.Host.UseSerilog((context, configuration) =>
-    configuration.ReadFrom.Configuration(context.Configuration));
+builder.Host.UseSerilog((context, services, configuration) =>
+{
+    configuration
+        .ReadFrom.Configuration(context.Configuration)
+        .WriteTo.Console()
+        .WriteTo.Fluentd(
+            host: context.Configuration["Logging:Fluentd:Host"],
+            port: int.Parse(context.Configuration["Logging:Fluentd:Port"] ?? "24224"),
+            tag: context.Configuration["Logging:Fluentd:Tag"] ?? "aspnet"
+        );
+});
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigin", policy =>
