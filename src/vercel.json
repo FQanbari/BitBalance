@@ -1,0 +1,24 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "BitBalance.Client/package.json",
+      "use": "@vercel/static-build",
+      "config": { "distDir": "dist" }
+    },
+    {
+      "src": "BitBalance.API/Program.cs",
+      "use": "@vercel/dotnet"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "BitBalance.API/Program.cs"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "BitBalance.Client/dist/$1"
+    }
+  ]
+}

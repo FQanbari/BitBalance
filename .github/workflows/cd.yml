@@ -1,0 +1,46 @@
+
+name: CD Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  deploy-vercel:
+    name: Deploy to Vercel
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Vercel Deploy
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          working-directory: ./src/BitBalance.Client
+          alias-domains: |
+            bitbalance.vercel.app
+
+  deploy-azure-api:
+    name: Deploy API to Azure App Service
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Publish API
+        run: dotnet publish ./src/BitBalance.API/BitBalance.API.csproj -c Release -o publish
+
+      - name: Deploy to Azure
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ secrets.AZURE_APP_NAME }}
+          publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
+          package: publish
