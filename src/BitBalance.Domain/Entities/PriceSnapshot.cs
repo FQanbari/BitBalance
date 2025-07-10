@@ -17,7 +17,6 @@ public class PriceSnapshot: BaseEntity<Guid>
         if (coinSymbol == null) throw new ArgumentNullException(nameof(coinSymbol));
         if (price == null) throw new ArgumentNullException(nameof(price));
 
-        Id = Guid.NewGuid();
         CoinSymbol = coinSymbol;
         Price = price;
         CreatedAt = timestamp;
@@ -25,7 +24,8 @@ public class PriceSnapshot: BaseEntity<Guid>
     public void UpdatePrice(Money newPrice)
     {
         if (newPrice == null) throw new ArgumentNullException(nameof(newPrice));
-        Price = newPrice;
+        Price.With(newPrice.Amount, newPrice.Currency);
+        CreatedAt = DateTime.UtcNow;
     }
 }
 public class PriceSnapshotConfiguration : IEntityTypeConfiguration<PriceSnapshot>
@@ -34,6 +34,7 @@ public class PriceSnapshotConfiguration : IEntityTypeConfiguration<PriceSnapshot
     {
         builder.HasKey(p => p.Id);
 
+
         builder.Property(p => p.CoinSymbol)
             .HasConversion(
                 cs => cs.Symbol,
@@ -41,6 +42,7 @@ public class PriceSnapshotConfiguration : IEntityTypeConfiguration<PriceSnapshot
             .IsRequired()
             .HasMaxLength(10);
 
+        builder.HasIndex(p => p.CoinSymbol).IsUnique();
 
         builder.OwnsOne(p => p.Price, money =>
         {

@@ -22,6 +22,21 @@ public class Money : ValueObject
         Amount = decimal.Round(amount, 3);
         Currency = currency.ToUpper();
     }
+    public Money WithNewAmount(decimal newAmount)
+    {
+        return new Money(newAmount, this.Currency);
+    }
+    public Money WithNewCurrency(string newCurrency)
+    {
+        return new Money(this.Amount, newCurrency);
+    }
+    public Money With(decimal? newAmount = null, string? newCurrency = null)
+    {
+        return new Money(
+            newAmount ?? this.Amount,
+            newCurrency ?? this.Currency
+        );
+    }
 
     public static Money operator +(Money a, Money b)
     {

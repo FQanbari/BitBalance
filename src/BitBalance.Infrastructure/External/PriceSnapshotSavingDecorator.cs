@@ -25,7 +25,27 @@ public class PriceSnapshotSavingDecorator : ICryptoPriceProvider
         _unitOfWork = unitOfWork;
         _trackedSymbolService = trackedSymbolService;
     }
+    
+    public ICryptoPriceProvider? SetNext(ICryptoPriceProvider next)
+    {
+        return _innerProvider.SetNext(next);
+    }
 
+    public async Task<Money?> TryGetPriceAsync(CoinSymbol symbol)
+    {
+        var price = await _innerProvider.TryGetPriceAsync(symbol);
+
+        if (price != null)
+        {
+            var snapshot = new PriceSnapshot(symbol, price, DateTime.UtcNow);
+            await _priceSnapshotRepository.UpsertSnapshotAsync(snapshot);
+            await _unitOfWork.SaveChangesAsync();
+            _trackedSymbolService.Track(symbol);
+        }
+
+        return price;
+    }
+    /*
     public async Task<Money> GetPriceAsync(CoinSymbol symbol)
     {
         if (symbol == null) throw new ArgumentNullException(nameof(symbol));
@@ -40,24 +60,5 @@ public class PriceSnapshotSavingDecorator : ICryptoPriceProvider
 
         return price;
     }
-
-    public ICryptoPriceProvider? SetNext(ICryptoPriceProvider next)
-    {
-        return _innerProvider.SetNext(next);
-    }
-
-    public async Task<Money?> TryGetPriceAsync(CoinSymbol symbol)
-    {
-        var price = await _innerProvider.TryGetPriceAsync(symbol);
-
-        if (price != null)
-        {
-            var snapshot = new PriceSnapshot(symbol, price, DateTime.UtcNow);
-            await _priceSnapshotRepository.AddAsync(snapshot);
-            // await _unitOfWork.SaveChangesAsync();
-            _trackedSymbolService.Track(symbol);
-        }
-
-        return price;
-    }
+    */
 }

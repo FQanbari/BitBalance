@@ -1,8 +1,10 @@
 ﻿using BitBalance.Domain.Entities;
+using BitBalance.Domain.ValueObjects;
 
 namespace BitBalance.Domain.Interfaces;
 
 public interface IPriceSnapshotRepository
 {
-    Task AddAsync(PriceSnapshot snapshot);
+    Task<IEnumerable<CoinSymbol>> GetAllCoinSymbols();
+    Task UpsertSnapshotAsync(PriceSnapshot snapshot);
 }

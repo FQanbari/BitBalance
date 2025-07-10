@@ -13,6 +13,8 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using BitBalance.Infrastructure.SignalR;
 using BitBalance.Infrastructure.External;
+using BitBalance.Domain.ValueObjects;
+using Polly;
 
 namespace BitBalance.Infrastructure.Extensions;
 
@@ -24,6 +26,7 @@ public static class ServiceCollectionExtensions
 
         services.Configure<CryptoProvidersOptions>(configuration.GetSection("CryptoProviders"));
         services.Configure<PriceUpdaterOptions>(configuration.GetSection("PriceUpdater"));
+        services.Configure<PriceFetcherOptions>(configuration.GetSection("PriceFetcherOptions"));
 
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -47,24 +50,39 @@ public static class ServiceCollectionExtensions
         {
             var notifier = sp.GetRequiredService<PriceBroadcaster>();
             var httpClient = sp.GetRequiredService<IHttpClientFactory>().CreateClient();
-            var options = sp.GetRequiredService<IOptions<CryptoProvidersOptions>>().Value;
             var cache = sp.GetRequiredService<IMemoryCache>();
             var snapshotRepo = sp.GetRequiredService<IPriceSnapshotRepository>();
             var unitOfWork = sp.GetRequiredService<IUnitOfWork>();
             var tracker = sp.GetRequiredService<ITrackedSymbolService>();
+            var pollyOptions = sp.GetRequiredService<IOptions<PriceFetcherOptions>>().Value;
 
-            var binance = new BinancePriceProvider(httpClient, notifier, Options.Create(options.CoinGecko));
-            var coinGecko = new CoinGeckoPriceProvider(httpClient, notifier, Options.Create(options.CoinGecko));
-            var coinCap = new CoinCapPriceProvider(httpClient, notifier, Options.Create(options.CoinGecko));
-            var compare = new CryptoComparePriceProvider(httpClient, notifier,Options.Create(options.CryptoCompare));
-            var nomics = new NomicsPriceProvider(httpClient, notifier, Options.Create(options.Nomics));
-            
-            var chain = new PollyWrappedProvider(binance);
-            chain.SetNext(new PollyWrappedProvider(coinGecko))
-                 .SetNext(new PollyWrappedProvider(coinCap))
-                 .SetNext(new PollyWrappedProvider(compare))
-                 .SetNext(new PollyWrappedProvider(nomics));
-            
+            var options = sp.GetRequiredService<IOptions<CryptoProvidersOptions>>().Value;
+            var providerMap = new Dictionary<string, ICryptoPriceProvider>
+            {
+                ["CoinGecko"] = new CoinGeckoPriceProvider(httpClient, notifier, Options.Create(options.CoinGecko)),
+                ["CoinCap"] = new CoinCapPriceProvider(httpClient, notifier, Options.Create(options.CoinGecko)),
+                ["Binance"] = new BinancePriceProvider(httpClient, notifier, Options.Create(options.CoinGecko)),
+                ["Nomics"] = new NomicsPriceProvider(httpClient, notifier, Options.Create(options.Nomics)),
+                ["CryptoCompare"] = new CryptoComparePriceProvider(httpClient, notifier, Options.Create(options.CryptoCompare)),
+            };
+
+            ICryptoPriceProvider? chain = null;
+            ICryptoPriceProvider? current = null;
+
+            foreach (var name in options.Order)
+            {
+                var provider = new PollyWrappedProvider(providerMap[name], Options.Create(pollyOptions));
+                if (chain == null)
+                {
+                    chain = provider;
+                    current = provider;
+                }
+                else
+                {
+                    current = current!.SetNext(provider);
+                }
+            }
+
             var cachedChain = new CachedPriceProviderDecorator(chain, cache, TimeSpan.FromMinutes(5));
             var savingDecorator = new PriceSnapshotSavingDecorator(cachedChain, snapshotRepo, unitOfWork, tracker);
 

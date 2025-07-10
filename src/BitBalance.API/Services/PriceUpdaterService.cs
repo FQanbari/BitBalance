@@ -37,6 +37,7 @@ public class _PriceUpdaterService : BackgroundService
                 if (price != null)
                 {
                     await _broadcaster.BroadcastPriceAsync(symbol.Symbol, price.Amount);
+                    await _broadcaster.BroadcastProviderUsed(GetType().Name);
                 }
             }
 
@@ -71,6 +72,7 @@ public class PriceUpdaterService : BackgroundService
                 if (price != null)
                 {
                     await broadcaster.BroadcastPriceAsync(symbol.Symbol, price.Amount);
+                    await broadcaster.BroadcastProviderUsed(GetType().Name);
                 }
             }
 
@@ -78,3 +80,4 @@ public class PriceUpdaterService : BackgroundService
         }
     }
 }
+

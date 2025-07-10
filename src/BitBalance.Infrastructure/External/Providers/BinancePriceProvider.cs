@@ -1,7 +1,8 @@
-﻿using BitBalance.Domain.ValueObjects;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
+using BitBalance.Domain.ValueObjects;
 using BitBalance.Infrastructure.SignalR;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 
 namespace BitBalance.Infrastructure.External.CoinGecko;
 
@@ -25,7 +26,7 @@ public class BinancePriceProvider : BaseCryptoProvider
         response.EnsureSuccessStatusCode();
 
         var json = await response.Content.ReadAsStringAsync();
-        var data = JsonConvert.DeserializeObject<BinancePriceResponse>(json);
+        var data = JsonSerializer.Deserialize<BinancePriceResponse>(json);
 
         if (!decimal.TryParse(data.Price, out var price))
             throw new ApplicationException("Invalid price format.");
@@ -54,7 +55,6 @@ public class BinancePriceProvider : BaseCryptoProvider
 
     private class BinancePriceResponse
     {
-        [JsonProperty("price")]
         public string Price { get; set; }
     }
 }
