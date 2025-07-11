@@ -1,9 +1,11 @@
 ﻿using BitBalance.API.Filters;
-using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using System;
-using System.Security.Claims;
 using BitBalance.API.Services;
+using BitBalance.Infrastructure.Persistence;
+using Serilog;
+using System.Text.Json.Serialization;
+using System.Text.Json;
 
 namespace BitBalance.API.Extensions;
 
@@ -11,60 +13,50 @@ public static class APIServiceExtensions
 {
     public static IServiceCollection AddAPIService(this IServiceCollection services)
     {
-        services.AddSwaggerDocumentation();
+        //services.AddSwaggerDocumentation();
+        
         services.AddScoped<RequestLoggingFilter>();
      
         services.AddHostedService<PriceUpdaterService>();
+        services.AddCors(options =>
+        {
+            options.AddPolicy("AllowSpecificOrigin", policy =>
+            {
+                policy.WithOrigins("http://localhost:55007", "http://localhost:42732")
+                      .AllowAnyMethod()
+                      .AllowAnyHeader()
+                      .AllowCredentials();
+            });
+        });
+        services.AddControllers()
+            .AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase, allowIntegerValues: false));
+            });
 
         return services;
     }
 
-    public static IApplicationBuilder UseAPIService(this IApplicationBuilder app)
-    {
-        app.UseSwaggerDocumentation();
-        app.UseCors("AllowSpecificOrigin");
-
-        return app;
-    }
 }
-
-
-public static class ClaimsPrincipalExtensions
+public static class SerilogExtensions
 {
-    /// <summary>
-    /// Get UserId as string
-    /// </summary>
-    public static string GetUserId(this ClaimsPrincipal principal)
+    public static void ConfigureSerilog(this WebApplicationBuilder builder)
     {
-        if (principal == null)
-            throw new ArgumentNullException(nameof(principal));
-        return "b4c5701b-ba0d-4619-9e8f-2e48292733b3";
-        return principal.FindFirstValue(ClaimTypes.NameIdentifier)
-               ?? throw new InvalidOperationException("User ID claim not found");
-    }
-    /// <summary>
-    /// Get UserId as Guid
-    /// </summary>
-    public static Guid GetUserIdAsGuid(this ClaimsPrincipal principal)
-    {
-        var userIdString = principal.GetUserId();
+        // Initial logger to capture errors during app startup
+        Log.Logger = new LoggerConfiguration()
+            .ReadFrom.Configuration(builder.Configuration)
+            .CreateLogger();
 
-        if (!Guid.TryParse(userIdString, out Guid userId))
-            throw new InvalidOperationException("User ID is not a valid GUID");
-
-        return userId;
-    }
-}
-public static class HttpContextExtensions
-{
-    /// <summary>
-    /// Get UserId from HttpContext
-    /// </summary>
-    public static string GetCurrentUserId(this IHttpContextAccessor httpContextAccessor)
-    {
-        if (httpContextAccessor?.HttpContext?.User == null)
-            throw new InvalidOperationException("User is not authenticated");
-
-        return httpContextAccessor.HttpContext.User.GetUserId();
+        builder.Host.UseSerilog((context, services, configuration) =>
+        {
+            configuration
+                .ReadFrom.Configuration(context.Configuration)
+                .WriteTo.Console()
+                .WriteTo.Fluentd(
+                    host: context.Configuration["Logging:Fluentd:Host"],
+                    port: int.Parse(context.Configuration["Logging:Fluentd:Port"] ?? "24224"),
+                    tag: context.Configuration["Logging:Fluentd:Tag"] ?? "aspnet"
+                );
+        });
     }
 }

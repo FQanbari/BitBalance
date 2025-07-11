@@ -23,6 +23,7 @@ public class PriceUpdaterOptions
 
 public class PriceFetcherOptions
 {
+    public const string SectionName = "PriceFetcherOptions";
     public int RetryCount { get; set; } = 3;
     public int InitialDelaySeconds { get; set; } = 1;
     public bool UseExponentialBackoff { get; set; } = true;

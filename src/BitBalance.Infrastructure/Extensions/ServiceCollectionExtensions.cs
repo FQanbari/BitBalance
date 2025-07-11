@@ -23,7 +23,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
 
-
+        services.AddBitBalanceDbContext(configuration);
         services.Configure<CryptoProvidersOptions>(configuration.GetSection("CryptoProviders"));
         services.Configure<PriceUpdaterOptions>(configuration.GetSection("PriceUpdater"));
         services.Configure<PriceFetcherOptions>(configuration.GetSection("PriceFetcherOptions"));
@@ -91,14 +91,24 @@ public static class ServiceCollectionExtensions
 
         return services;
     }
-    public async static Task<IApplicationBuilder> UseInfrastructure(this IApplicationBuilder app)
+
+
+    public static IServiceCollection AddBitBalanceDbContext(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddDbContext<BitBalanceDbContext>(options =>
+            options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+
+        return services;
+    }
+
+    public static async Task<IApplicationBuilder> SeedBitBalanceDatabaseAsync(this IApplicationBuilder app)
     {
         using (var scope = app.ApplicationServices.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<BitBalanceDbContext>();
             await DbInitializer.SeedAsync(db);
         }
-    
+
         return app;
     }
 }
