@@ -18,10 +18,9 @@ builder.ConfigureSerilog();
 builder.Services.AddAPIService();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddSwaggerDocumentation();
 
 var app = builder.Build();
-
-app.MapFallbackToFile("index.html");
 
 app.UseSerilogRequestLogging();
 
@@ -39,5 +38,7 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.MapHub<PriceHub>("/priceHub");
+
+app.MapGet("/", () => "Hello World!");
 
 app.Run();
