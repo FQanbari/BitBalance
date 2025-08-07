@@ -106,6 +106,7 @@ public static class ServiceCollectionExtensions
         using (var scope = app.ApplicationServices.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<BitBalanceDbContext>();
+            await db.Database.MigrateAsync();
             await DbInitializer.SeedAsync(db);
         }
 
