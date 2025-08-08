@@ -106,10 +106,21 @@ public static class ServiceCollectionExtensions
         using (var scope = app.ApplicationServices.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<BitBalanceDbContext>();
-            await db.Database.MigrateAsync();
-            await DbInitializer.SeedAsync(db);
+
+            try
+            {
+                Console.WriteLine($"CONN: {db.Database.GetDbConnection().ConnectionString}");
+
+                await db.Database.MigrateAsync();
+                await DbInitializer.SeedAsync(db);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Failed to connect or migrate database: " + ex.Message);
+            }
         }
 
         return app;
     }
+
 }

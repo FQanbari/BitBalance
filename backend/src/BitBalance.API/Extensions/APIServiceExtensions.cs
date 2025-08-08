@@ -11,30 +11,34 @@ namespace BitBalance.API.Extensions;
 
 public static class APIServiceExtensions
 {
-    public static IServiceCollection AddAPIService(this IServiceCollection services)
+    public static void AddAPIService(this WebApplicationBuilder builder)
     {
         //services.AddSwaggerDocumentation();
         
-        services.AddScoped<RequestLoggingFilter>();
-     
-        services.AddHostedService<PriceUpdaterService>();
-        services.AddCors(options =>
+        builder.Services.AddScoped<RequestLoggingFilter>();
+
+        builder.Services.AddHostedService<PriceUpdaterService>();
+        var allowedOrigins = builder.Configuration
+            .GetSection("Cors:AllowedOrigins")
+            .Get<string[]>();
+
+        builder.Services.AddCors(options =>
         {
             options.AddPolicy("AllowSpecificOrigin", policy =>
             {
-                policy.WithOrigins("http://localhost:55007", "http://localhost:42732")
-                      .AllowAnyMethod()
-                      .AllowAnyHeader()
-                      .AllowCredentials();
+                policy.WithOrigins(allowedOrigins)
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowCredentials();
             });
         });
-        services.AddControllers()
+
+        builder.Services.AddControllers()
             .AddJsonOptions(options =>
             {
                 options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase, allowIntegerValues: false));
             });
 
-        return services;
     }
 
 }

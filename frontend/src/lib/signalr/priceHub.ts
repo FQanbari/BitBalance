@@ -45,7 +45,7 @@ class PriceStore {
         if (this.connection) return;
 
         this.connection = new HubConnectionBuilder()
-            .withUrl("https://localhost:55008/priceHub")
+            .withUrl(`${import.meta.env.VITE_API_URL}/priceHub`)
             .withAutomaticReconnect()
             .configureLogging(LogLevel.Information)
             .build();

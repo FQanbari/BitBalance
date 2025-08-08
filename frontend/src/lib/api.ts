@@ -2,7 +2,7 @@
 import axios from 'axios';
 import { Alert, Asset, Portfolio, UserSettings } from '../types';
 
-const API_URL = 'https://localhost:55008/api';
+const API_URL = `${import.meta.env.VITE_API_URL}/api`;
 
 export const apiClient = axios.create({
   baseURL: API_URL,

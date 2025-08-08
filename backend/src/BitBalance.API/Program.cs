@@ -15,7 +15,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.ConfigureSerilog();
 
-builder.Services.AddAPIService();
+builder.AddAPIService();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddSwaggerDocumentation();
